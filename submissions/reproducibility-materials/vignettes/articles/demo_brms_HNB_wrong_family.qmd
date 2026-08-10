@@ -1,0 +1,1373 @@
+---
+title: "Bayesian Z-residual Diagnostics for Wrong Family with HNB Data (Section S1.1)"
+
+author: "Anonymous Author"
+date: today
+format:
+  html:
+    toc: true
+    number-sections: true
+    page-layout: full
+    code-fold: true
+    html-math-method: mathjax
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+  eval: true
+vignette: >
+  %\VignetteIndexEntry{Reproducible demo for Bayesian Z-residual diagnostics in discrete count models}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+<!-- VERSION: discrete-hnb-nb-demo; single-dataset demo with direct Zresidual, PPC, and HPC calls. -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  fig.width = 7,
+  fig.height = 5,
+  fig.align = "center"
+)
+
+set.seed(123)
+```
+
+## Installing and Loading Required Packages
+
+**Install Zresidual**
+
+```{r install-zresidual}
+#| eval: false
+#| output: false
+#| message: false
+
+# During package development, run this once from the package root before rendering:
+# renv::install(here::here(), dependencies = TRUE)
+#
+# For a clean external environment, install the released or review version instead:
+# if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+# remotes::install_github("anonymous/Zresidual", upgrade = "never", dependencies = TRUE)
+```
+
+**Loading required packages**
+
+```{r load-packages}
+#| output: false
+#| message: false
+#| warning: false
+
+pkgs <- c("brms", "dplyr", "tibble", "gt", "htmltools", "loo", "Zresidual")
+missing_pkgs <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+
+if (length(missing_pkgs)) {
+  stop(
+    "Please install the following packages before rendering this vignette: ",
+    paste(missing_pkgs, collapse = ", "),
+    call. = FALSE
+  )
+}
+
+invisible(lapply(pkgs, function(p) {
+  suppressPackageStartupMessages(library(p, character.only = TRUE))
+}))
+```
+
+## Simulation and Fitting Settings
+
+This demo renders one representative discrete-response dataset generated from a hurdle negative binomial (HNB) model. The goal is to show how Z-residual diagnostics can be used for a fitted Bayesian count model and how their results compare with PPC and HPC diagnostics. The fixed sample size is `n_sample = 100`. The demo directly reloads the paper dataset and saved model fits from `resources/demo_brms_HNB_wrong_family`, together with cached Z-residual, PPC, and HPC results when available; it is not a full multi-dataset simulation study.
+
+```{r simulation-settings}
+# Representative dataset size for this standalone demo.
+n_sample <- 100
+
+sample_tag <- paste0("N", n_sample)
+file_tag <- paste0("_n", n_sample)
+
+# One representative dataset only. This is not a 500-replication run.
+representative_id <- 1L
+force_recalc <- FALSE
+force_refit <- force_recalc
+force_rerun <- force_recalc
+force_recompute_zres <- force_recalc
+force_recompute_ppc_hpc <- force_recalc
+
+# Holdout proportion for the single-dataset HPC calculation.
+test_prop <- 0.20
+
+# Data-generating parameters for the HNB example.
+alpha0 <- 2
+alpha1 <- 8
+
+beta0 <- -1
+beta1 <- -1
+
+true_size <- 4
+n_noise <- 5
+
+brms_backend <- "rstan"
+brms_cores <- 1
+brms_chains <- 4
+brms_iter <- 2000
+brms_warmup <- 1000
+
+ndraws_use <- 2000
+seed_use <- 20260623
+x_check <- c("lp")
+
+# Number of auxiliary randomizations for RSP Z-residuals on one fixed dataset.
+# This is not the number of simulated datasets.
+nrep_z <- 500
+
+# MSP Z-residuals do not use auxiliary randomization.
+nrep_msp <- 1
+
+options(mc.cores = brms_cores)
+
+if (requireNamespace("rstan", quietly = TRUE)) {
+  rstan::rstan_options(auto_write = TRUE)
+}
+
+hnb_family <- brms::hurdle_negbinomial(
+  link = "log",
+  link_shape = "identity",
+  link_hu = "logit"
+)
+
+nb_family <- brms::negbinomial(
+  link = "log",
+  link_shape = "identity"
+)
+
+required_cols <- c("y", "x", "z1", "z2", "z3", "z4", "z5")
+
+get_vignette_dir <- function() {
+  input <- knitr::current_input()
+  if (!is.null(input) && length(input) == 1L && nzchar(input)) {
+    return(dirname(normalizePath(input, mustWork = FALSE)))
+  }
+
+  # Fallback for interactive sourcing.
+  getwd()
+}
+
+vignette_dir <- get_vignette_dir()
+
+# The reviewer-facing archive stores the fixed paper dataset and saved fits here.
+# Accept both `resources` and `resource` in case one spelling is used locally.
+resources_candidates <- c(
+  file.path(vignette_dir, "resources", "demo_brms_HNB_wrong_family"),
+  file.path(vignette_dir, "resource",  "demo_brms_HNB_wrong_family")
+)
+
+resources_path <- resources_candidates[dir.exists(resources_candidates)][1]
+
+if (is.na(resources_path) || !nzchar(resources_path)) {
+  stop(
+    "Cannot find the resources directory. Expected one of:\n",
+    paste(resources_candidates, collapse = "\n"),
+    call. = FALSE
+  )
+}
+
+data_file <- file.path(resources_path, "sim1_hnb_data.Rdata")
+fits_full_file <- file.path(resources_path, "sim1_hnb_model_fitting.Rdata")
+
+zres_rsp_post_file <- file.path(
+  resources_path,
+  paste0("zres_rsp_post_list_all_", sample_tag, ".rds")
+)
+
+zres_rsp_iscv_file <- file.path(
+  resources_path,
+  paste0("zres_rsp_iscv_list_all_", sample_tag, ".rds")
+)
+
+zres_msp_post_file <- file.path(
+  resources_path,
+  paste0("zres_msp_post_list_all_", sample_tag, ".rds")
+)
+
+zres_msp_iscv_file <- file.path(
+  resources_path,
+  paste0("zres_msp_iscv_list_all_", sample_tag, ".rds")
+)
+
+ppc_file <- file.path(
+  resources_path,
+  paste0("ppc_list_all_", sample_tag, ".rds")
+)
+
+hpc_file <- file.path(
+  resources_path,
+  paste0("hpc_list_all_", sample_tag, ".rds")
+)
+
+hpc_split_file <- file.path(
+  resources_path,
+  paste0("hpc_split_all_", sample_tag, ".rds")
+)
+
+if (!file.exists(data_file)) {
+  stop(
+    "Cannot find the fixed paper dataset: ", data_file,
+    "\nExpected file name: sim1_hnb_data.Rdata",
+    call. = FALSE
+  )
+}
+
+if (!file.exists(fits_full_file)) {
+  stop(
+    "Cannot find the saved model-fitting file: ", fits_full_file,
+    "\nExpected file name: sim1_hnb_model_fitting.Rdata",
+    call. = FALSE
+  )
+}
+```
+
+## What This Demo Shows
+
+This demo illustrates Z-residual diagnostics for a discrete count response. Data are generated from a hurdle negative binomial (HNB) model, and two Bayesian models are fitted to the same data:
+
+1. HNB model: the response family matches the data-generating mechanism.
+2. NB model: the hurdle component is omitted, creating a wrong-family comparison.
+
+Because the response is discrete, randomized survival probabilities (RSPs) use auxiliary uniform randomization to recover a continuous uniform reference scale. This demo therefore computes 500 randomized Z-residual replicates for each posterior and ISCV diagnostic, summarizes their p-values using the distribution-free upper-bound p-value, and compares the resulting diagnostics with PPC and HPC checks.
+
+## Data-generating Model
+
+For each observation,
+
+$$
+X_i \sim N(0,1), \qquad Z_{i,j}\sim N(0,1),\quad j=1,\ldots,5.
+$$
+
+The data are generated from a hurdle negative binomial model. The count-component mean is
+
+$$
+\log(\mu_i)=\alpha_0+\alpha_1X_i,
+$$
+
+and the hurdle, or zero-probability, component is
+
+$$
+\mathrm{logit}(\pi_i^0)=\beta_0+\beta_1X_i.
+$$
+
+The executable settings used in this demo are
+
+$$
+\alpha_0=2,\qquad \alpha_1=8,
+$$
+
+$$
+\beta_0=-1,\qquad \beta_1=-1,
+$$
+
+with negative-binomial size parameter
+
+$$
+\mathrm{size}=4.
+$$
+
+The five nuisance covariates are generated with true coefficient zero and are included in the fitted models to match the simulation-code structure.
+
+## Simulation and Fitting Utilities
+
+The code below only defines utilities for simulating the representative dataset and caching the `brms` fits. The Z-residual, plotting, PPC, and HPC diagnostics later in the demo are called directly from `Zresidual`.
+
+```{r simulation-fitting-utilities}
+inv_logit <- function(x) stats::plogis(x)
+
+# Zero-truncated negative binomial generator.
+# R's rnbinom(size, mu) uses E(Y) = mu and Var(Y) = mu + mu^2 / size.
+rztnegbin <- function(n, mu, size) {
+  if (length(mu) == 1L) mu <- rep(mu, n)
+  if (length(size) == 1L) size <- rep(size, n)
+  stopifnot(length(mu) == n, length(size) == n)
+
+  p0 <- stats::dnbinom(0, size = size, mu = mu)
+  u <- p0 + stats::runif(n) * (1 - p0)
+  u <- pmin(u, 1 - .Machine$double.eps)
+  y <- stats::qnbinom(u, size = size, mu = mu)
+
+  # Keep the draw numeric here. The simulator checks integer feasibility
+  # before converting to integer, avoiding silent NA values from overflow.
+  pmax(y, 1)
+}
+
+sim_s11_hnb <- function(
+  sample_size = n_sample,
+  seed = seed_use,
+  alpha0 = 2,
+  alpha1 = 8,
+  beta0 = -1,
+  beta1 = -1,
+  true_size = 4,
+  n_noise = 5,
+  max_attempts = 200
+) {
+  n <- sample_size
+
+  for (attempt in seq_len(max_attempts)) {
+    set.seed(seed + attempt - 1L)
+
+    x <- stats::rnorm(n)
+    z <- replicate(n_noise, stats::rnorm(n))
+    colnames(z) <- paste0("z", seq_len(n_noise))
+
+    eta_count <- alpha0 + alpha1 * x
+    mu <- exp(eta_count)
+
+    eta_zero <- beta0 + beta1 * x
+    pi0 <- inv_logit(eta_zero)
+
+    is_zero <- stats::rbinom(n, size = 1, prob = pi0) == 1L
+    y_pos <- rztnegbin(n = n, mu = mu, size = true_size)
+    y_raw <- ifelse(is_zero, 0, y_pos)
+
+    # brms count responses are stored as integers internally. With alpha1 = 8,
+    # rare extreme x values can generate enormous counts; converting those to
+    # integer can create NA. Regenerate the representative dataset until the
+    # realized counts are finite and integer-safe.
+    y_int <- suppressWarnings(as.integer(y_raw))
+
+    ok_y <- all(
+      is.finite(y_raw),
+      !is.na(y_int),
+      y_raw >= 0,
+      y_raw <= .Machine$integer.max
+    )
+
+    if (ok_y) {
+      out <- tibble::tibble(
+        y = y_int,
+        x = x,
+        z1 = z[, "z1"],
+        z2 = z[, "z2"],
+        z3 = z[, "z3"],
+        z4 = z[, "z4"],
+        z5 = z[, "z5"],
+        zeros = as.integer(y_int == 0L),
+        eta_count = eta_count,
+        mu_true = mu,
+        eta_zero = eta_zero,
+        pi0_true = pi0,
+        true_size = true_size,
+        sim_attempt = attempt
+      )
+
+      return(out)
+    }
+  }
+
+  stop(
+    "Could not generate an integer-safe HNB dataset after ",
+    max_attempts,
+    " attempts. Try a different seed_data or reduce alpha1.",
+    call. = FALSE
+  )
+}
+
+fit_or_read_brms <- function(
+  file,
+  formula,
+  data,
+  seed,
+  family,
+  prior,
+  chains = brms_chains,
+  iter = brms_iter,
+  warmup = brms_warmup
+) {
+  if (!force_refit && file.exists(file)) {
+    return(readRDS(file))
+  }
+
+  fit <- brms::brm(
+    formula = formula,
+    family = family,
+    prior = prior,
+    data = data,
+    backend = brms_backend,
+    refresh = 0,
+    cores = brms_cores,
+    chains = chains,
+    iter = iter,
+    warmup = warmup,
+    seed = seed,
+    control = list(adapt_delta = 0.95, max_treedepth = 12),
+    save_pars = brms::save_pars(all = TRUE)
+  )
+
+  saveRDS(fit, file = file)
+  fit
+}
+```
+
+
+```{r zresidual-chisq-calculation}
+zresid_chisq_pvalue <- function(zres, df) {
+  if (is.list(zres) && !is.null(zres$zresidual)) {
+    zres <- zres$zresidual
+  }
+
+  zmat <- as.matrix(zres)
+  storage.mode(zmat) <- "numeric"
+
+  pvals <- apply(
+    zmat,
+    2,
+    function(z) stats::pchisq(sum(z^2, na.rm = TRUE), df = df, lower.tail = FALSE)
+  )
+
+  Zresidual::upper_bound_pvalue(pvals)
+}
+```
+
+## Simulate One Representative Dataset
+
+```{r simulate-representative-data}
+sim_id <- representative_id
+seed_data <- seed_use + sim_id - 1
+
+load_rdata_env <- function(file) {
+  env <- new.env(parent = emptyenv())
+  load(file, envir = env)
+  env
+}
+
+pick_loaded_object <- function(env, candidates, required = TRUE, label = "object") {
+  for (nm in candidates) {
+    if (exists(nm, envir = env, inherits = FALSE)) {
+      return(get(nm, envir = env, inherits = FALSE))
+    }
+  }
+
+  # Also search inside list-like containers saved in the RData file.
+  for (obj_name in ls(env)) {
+    obj <- get(obj_name, envir = env, inherits = FALSE)
+    if (is.list(obj)) {
+      for (nm in candidates) {
+        if (!is.null(obj[[nm]])) {
+          return(obj[[nm]])
+        }
+      }
+    }
+  }
+
+  if (required) {
+    stop(
+      "Cannot find ", label, " in the loaded RData file. Tried names: ",
+      paste(candidates, collapse = ", "),
+      "\nObjects available: ", paste(ls(env), collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  NULL
+}
+
+pick_dataframe_with_cols <- function(env, required_cols) {
+  for (obj_name in ls(env)) {
+    obj <- get(obj_name, envir = env, inherits = FALSE)
+    if (is.data.frame(obj) && all(required_cols %in% names(obj))) {
+      return(obj)
+    }
+  }
+
+  # Also search inside list-like containers.
+  for (obj_name in ls(env)) {
+    obj <- get(obj_name, envir = env, inherits = FALSE)
+    if (is.list(obj)) {
+      for (nm in names(obj)) {
+        item <- obj[[nm]]
+        if (is.data.frame(item) && all(required_cols %in% names(item))) {
+          return(item)
+        }
+      }
+    }
+  }
+
+  NULL
+}
+
+data_env <- load_rdata_env(data_file)
+
+dat_hnb <- pick_loaded_object(
+  data_env,
+  candidates = c("dat_hnb", "hnb_data", "data_hnb", "sim1_hnb_data", "dat", "data"),
+  required = FALSE,
+  label = "fixed HNB dataset"
+)
+
+if (is.null(dat_hnb)) {
+  dat_hnb <- pick_dataframe_with_cols(data_env, required_cols)
+}
+
+if (is.null(dat_hnb)) {
+  stop(
+    "Cannot identify the fixed HNB dataset in: ", data_file,
+    "\nObjects available: ", paste(ls(data_env), collapse = ", "),
+    call. = FALSE
+  )
+}
+
+dat_hnb <- as.data.frame(dat_hnb)
+
+missing_cols <- setdiff(required_cols, names(dat_hnb))
+if (length(missing_cols)) {
+  stop(
+    "The fixed paper dataset is missing required columns: ",
+    paste(missing_cols, collapse = ", "),
+    call. = FALSE
+  )
+}
+
+if (!"zeros" %in% names(dat_hnb)) {
+  dat_hnb$zeros <- as.integer(dat_hnb$y == 0L)
+}
+
+if (anyNA(dat_hnb$y) || anyNA(dat_hnb[required_cols])) {
+  stop("The fixed paper dataset contains NA values in required columns.", call. = FALSE)
+}
+
+if (nrow(dat_hnb) != n_sample) {
+  stop(
+    "The fixed paper dataset has ", nrow(dat_hnb), " rows, but n_sample = ",
+    n_sample, ". Please keep n_sample consistent with sim1_hnb_data.Rdata.",
+    call. = FALSE
+  )
+}
+
+#dat_hnb %>%
+#  dplyr::summarise(
+#    n = dplyr::n(),
+#    zero_proportion = mean(zeros == 1),
+#    mean_y = mean(y),
+#    median_y = stats::median(y),
+#    max_y = max(y),
+#    min_x = min(x),
+#    max_x = max(x)
+#  ) %>%
+#  gt::gt() %>%
+#  gt::fmt_number(columns = dplyr::everything(), decimals = 3) %>%
+#  gt::tab_header(title = "Fixed HNB-generated paper dataset summary")
+```
+
+## Fit HNB and NB Models
+
+Both fitted models use the same linear predictor for the count-component mean. The HNB model also includes a hurdle component, while the NB model omits it.
+
+```{r fit-full-data-models}
+#| code-fold: true
+#| message: false
+#| warning: false
+
+hnb_prior <- c(
+  brms::prior(normal(0, 10), class = "Intercept"),
+  brms::prior(normal(0, 10), class = "b"),
+  brms::prior(normal(0, 10), class = "Intercept", dpar = "hu"),
+  brms::prior(normal(0, 10), class = "b", dpar = "hu"),
+  brms::prior(exponential(1), class = "shape")
+)
+
+nb_prior <- c(
+  brms::prior(normal(0, 10), class = "Intercept"),
+  brms::prior(normal(0, 10), class = "b"),
+  brms::prior(exponential(1), class = "shape")
+)
+
+formula_hnb <- brms::bf(
+  y ~ x + z1 + z2 + z3 + z4 + z5,
+  hu ~ x + z1 + z2 + z3 + z4 + z5
+)
+
+formula_nb <- brms::bf(
+  y ~ x + z1 + z2 + z3 + z4 + z5
+)
+
+model_env <- load_rdata_env(fits_full_file)
+
+is_brmsfit <- function(x) inherits(x, "brmsfit")
+
+pick_brms_fit <- function(env, candidates, label = "brmsfit", required = TRUE) {
+  obj <- pick_loaded_object(
+    env = env,
+    candidates = candidates,
+    required = FALSE,
+    label = label
+  )
+
+  if (is_brmsfit(obj)) {
+    return(obj)
+  }
+
+  # Search direct objects by name pattern and class.
+  all_names <- ls(env)
+  for (nm in all_names) {
+    x <- get(nm, envir = env, inherits = FALSE)
+    if (is_brmsfit(x) && nm %in% candidates) {
+      return(x)
+    }
+  }
+
+  if (required) {
+    brms_names <- all_names[vapply(
+      all_names,
+      function(nm) is_brmsfit(get(nm, envir = env, inherits = FALSE)),
+      logical(1L)
+    )]
+
+    stop(
+      "Cannot find ", label, " in: ", fits_full_file,
+      "\nTried names: ", paste(candidates, collapse = ", "),
+      "\nDirect brmsfit objects available: ", paste(brms_names, collapse = ", "),
+      "\nAll objects available: ", paste(all_names, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  NULL
+}
+
+fit_hnb <- pick_brms_fit(
+  model_env,
+  candidates = c(
+    "fit_hnb", "fit_s11_hnb", "hnb_fit", "fit_correct",
+    "fit_correct_full", "fit_hnb_full", "HNB", "HNB_fit"
+  ),
+  label = "full-data HNB fit"
+)
+
+fit_nb <- pick_brms_fit(
+  model_env,
+  candidates = c(
+    "fit_nb", "fit_s11_nb", "nb_fit", "fit_wrong",
+    "fit_wrong_full", "fit_nb_full", "NB", "NB_fit"
+  ),
+  label = "full-data NB fit"
+)
+```
+
+## Holdout Fits for PPC/HPC Comparisons
+
+The PPC checks use the full-data fits. The HPC checks use a deterministic 20% holdout split and refit each candidate model on the training subset.
+
+```{r fit-hpc-models}
+#| code-fold: true
+#| message: false
+#| warning: false
+
+hpc_split <- pick_loaded_object(
+  data_env,
+  candidates = c("hpc_split", "split_hpc", "s11_hpc_split"),
+  required = FALSE,
+  label = "HPC split"
+)
+
+if (!is.null(hpc_split) && is.list(hpc_split) &&
+    !is.null(hpc_split$train) && !is.null(hpc_split$test)) {
+  dat_hnb_train <- hpc_split$train
+  dat_hnb_test  <- hpc_split$test
+
+} else {
+  dat_hnb_train <- pick_loaded_object(
+    data_env,
+    candidates = c("dat_hnb_train", "hnb_train", "train", "train_data"),
+    required = FALSE,
+    label = "HPC training data"
+  )
+
+  dat_hnb_test <- pick_loaded_object(
+    data_env,
+    candidates = c("dat_hnb_test", "hnb_test", "test", "test_data"),
+    required = FALSE,
+    label = "HPC test data"
+  )
+}
+
+if (is.null(dat_hnb_train) || is.null(dat_hnb_test)) {
+  if (!force_rerun && file.exists(hpc_split_file)) {
+    hpc_split <- readRDS(hpc_split_file)
+    dat_hnb_train <- hpc_split$train
+    dat_hnb_test  <- hpc_split$test
+  } else {
+    set.seed(seed_use + 30000 + sim_id)
+    n_test <- max(1L, floor(test_prop * nrow(dat_hnb)))
+    test_id <- sort(sample(seq_len(nrow(dat_hnb)), size = n_test))
+    dat_hnb_train <- dat_hnb[-test_id, , drop = FALSE]
+    dat_hnb_test  <- dat_hnb[ test_id, , drop = FALSE]
+    saveRDS(
+      list(train = dat_hnb_train, test = dat_hnb_test, test_id = test_id),
+      hpc_split_file
+    )
+  }
+}
+
+dat_hnb_train <- as.data.frame(dat_hnb_train)
+dat_hnb_test  <- as.data.frame(dat_hnb_test)
+
+fit_hnb_hpc <- pick_brms_fit(
+  model_env,
+  candidates = c(
+    "fit_hnb_hpc", "fit_s11_hnb_hpc", "hnb_hpc_fit", "fit_correct_hpc",
+    "fit_hpc_hnb", "HNB_hpc", "fit_hnb_train"
+  ),
+  label = "HPC HNB fit",
+  required = FALSE
+)
+
+fit_nb_hpc <- pick_brms_fit(
+  model_env,
+  candidates = c(
+    "fit_nb_hpc", "fit_s11_nb_hpc", "nb_hpc_fit", "fit_wrong_hpc",
+    "fit_hpc_nb", "NB_hpc", "fit_nb_train"
+  ),
+  label = "HPC NB fit",
+  required = FALSE
+)
+
+if (is.null(fit_hnb_hpc)) {
+  fit_hnb_hpc <- fit_or_read_brms(
+    file = file.path(resources_path, paste0("fit_s11_hnb_hpc", file_tag, "_sim", sim_id, ".rds")),
+    formula = formula_hnb,
+    data = dat_hnb_train,
+    seed = seed_use + 40000 + sim_id,
+    family = hnb_family,
+    prior = hnb_prior
+  )
+}
+
+if (is.null(fit_nb_hpc)) {
+  fit_nb_hpc <- fit_or_read_brms(
+    file = file.path(resources_path, paste0("fit_s11_nb_hpc", file_tag, "_sim", sim_id, ".rds")),
+    formula = formula_nb,
+    data = dat_hnb_train,
+    seed = seed_use + 50000 + sim_id,
+    family = nb_family,
+    prior = nb_prior
+  )
+}
+
+#tibble::tibble(
+#  split = c("training", "test"),
+#  n = c(nrow(dat_hnb_train), nrow(dat_hnb_test))
+#) %>%
+#  gt::gt() %>%
+#  gt::tab_header(title = "HPC data split")
+```
+
+## Compute Posterior and ISCV Z-residuals
+
+The response is discrete. RSP Z-residuals use auxiliary randomization, while MSP Z-residuals use the mid-survival probability and therefore do not use auxiliary randomization.
+
+```{r compute-zresiduals}
+#| message: false
+#| warning: false
+
+force_recompute_zres_now <- if (exists("force_recompute_zres")) {
+  isTRUE(force_recompute_zres)
+} else {
+  isTRUE(force_recalc)
+}
+
+required_zres_names <- c("HNB", "NB")
+
+if (
+  !force_recompute_zres_now &&
+    file.exists(zres_rsp_post_file) &&
+    file.exists(zres_rsp_iscv_file) &&
+    file.exists(zres_msp_post_file) &&
+    file.exists(zres_msp_iscv_file)
+) {
+  zres_rsp_post_list <- readRDS(zres_rsp_post_file)
+  zres_rsp_iscv_list <- readRDS(zres_rsp_iscv_file)
+  zres_msp_post_list <- readRDS(zres_msp_post_file)
+  zres_msp_iscv_list <- readRDS(zres_msp_iscv_file)
+
+  missing_rsp_post <- setdiff(required_zres_names, names(zres_rsp_post_list))
+  missing_rsp_iscv <- setdiff(required_zres_names, names(zres_rsp_iscv_list))
+  missing_msp_post <- setdiff(required_zres_names, names(zres_msp_post_list))
+  missing_msp_iscv <- setdiff(required_zres_names, names(zres_msp_iscv_list))
+
+  if (
+    length(missing_rsp_post) ||
+      length(missing_rsp_iscv) ||
+      length(missing_msp_post) ||
+      length(missing_msp_iscv)
+  ) {
+    stop(
+      "Saved Z-residual files do not contain the expected model names.\n",
+      "Missing from RSP posterior list: ", paste(missing_rsp_post, collapse = ", "), "\n",
+      "Missing from RSP ISCV list: ", paste(missing_rsp_iscv, collapse = ", "), "\n",
+      "Missing from MSP posterior list: ", paste(missing_msp_post, collapse = ", "), "\n",
+      "Missing from MSP ISCV list: ", paste(missing_msp_iscv, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+} else {
+  z_hnb_rsp_post <- Zresidual::Zresidual(
+    fit_hnb,
+    data = dat_hnb,
+    mcmc_summarize = "post",
+    randomized = TRUE,
+    nrep = nrep_z
+  )
+
+  z_nb_rsp_post <- Zresidual::Zresidual(
+    fit_nb,
+    data = dat_hnb,
+    mcmc_summarize = "post",
+    randomized = TRUE,
+    nrep = nrep_z
+  )
+
+  z_hnb_rsp_iscv <- Zresidual::Zresidual(
+    fit_hnb,
+    data = dat_hnb,
+    mcmc_summarize = "iscv",
+    randomized = TRUE,
+    nrep = nrep_z
+  )
+
+  z_nb_rsp_iscv <- Zresidual::Zresidual(
+    fit_nb,
+    data = dat_hnb,
+    mcmc_summarize = "iscv",
+    randomized = TRUE,
+    nrep = nrep_z
+  )
+
+  z_hnb_msp_post <- Zresidual::Zresidual(
+    fit_hnb,
+    data = dat_hnb,
+    mcmc_summarize = "post",
+    randomized = FALSE,
+    nrep = nrep_msp
+  )
+
+  z_nb_msp_post <- Zresidual::Zresidual(
+    fit_nb,
+    data = dat_hnb,
+    mcmc_summarize = "post",
+    randomized = FALSE,
+    nrep = nrep_msp
+  )
+
+  z_hnb_msp_iscv <- Zresidual::Zresidual(
+    fit_hnb,
+    data = dat_hnb,
+    mcmc_summarize = "iscv",
+    randomized = FALSE,
+    nrep = nrep_msp
+  )
+
+  z_nb_msp_iscv <- Zresidual::Zresidual(
+    fit_nb,
+    data = dat_hnb,
+    mcmc_summarize = "iscv",
+    randomized = FALSE,
+    nrep = nrep_msp
+  )
+
+  zres_rsp_post_list <- list(
+    HNB = z_hnb_rsp_post,
+    NB = z_nb_rsp_post
+  )
+
+  zres_rsp_iscv_list <- list(
+    HNB = z_hnb_rsp_iscv,
+    NB = z_nb_rsp_iscv
+  )
+
+  zres_msp_post_list <- list(
+    HNB = z_hnb_msp_post,
+    NB = z_nb_msp_post
+  )
+
+  zres_msp_iscv_list <- list(
+    HNB = z_hnb_msp_iscv,
+    NB = z_nb_msp_iscv
+  )
+
+  saveRDS(zres_rsp_post_list, zres_rsp_post_file)
+  saveRDS(zres_rsp_iscv_list, zres_rsp_iscv_file)
+  saveRDS(zres_msp_post_list, zres_msp_post_file)
+  saveRDS(zres_msp_iscv_list, zres_msp_iscv_file)
+}
+
+z_hnb_rsp_post <- zres_rsp_post_list$HNB
+z_nb_rsp_post  <- zres_rsp_post_list$NB
+
+z_hnb_rsp_iscv <- zres_rsp_iscv_list$HNB
+z_nb_rsp_iscv  <- zres_rsp_iscv_list$NB
+
+z_hnb_msp_post <- zres_msp_post_list$HNB
+z_nb_msp_post  <- zres_msp_post_list$NB
+
+z_hnb_msp_iscv <- zres_msp_iscv_list$HNB
+z_nb_msp_iscv  <- zres_msp_iscv_list$NB
+
+zcov_hnb <- Zresidual::Zcov(fit_hnb, data = dat_hnb)
+zcov_nb  <- Zresidual::Zcov(fit_nb,  data = dat_hnb)
+
+fits_full <- list(
+  HNB = fit_hnb,
+  NB = fit_nb
+)
+
+p_eff <- vapply(
+  fits_full,
+  function(fit) loo::loo(fit)$estimates["p_loo", "Estimate"],
+  numeric(1L)
+)
+
+df_post <- vapply(
+  names(zres_rsp_post_list),
+  function(mm) max(1, nrow(as.matrix(zres_rsp_post_list[[mm]])) - p_eff[[mm]]),
+  numeric(1L)
+)
+
+df_iscv <- vapply(
+  zres_rsp_iscv_list,
+  function(zres) nrow(as.matrix(zres)),
+  numeric(1L)
+)
+```
+
+## Visual Diagnostics
+
+The first row displays posterior Z-residuals against the observation index. The second row shows quantile--quantile plots against the standard normal reference distribution. The third row shows marginal histograms with the empirical density and the standard normal reference density overlaid. The RSP panels use auxiliary randomization, whereas the MSP panels use the deterministic mid-survival probability.
+
+```{r fig-s11-visual-diagnostics}
+#| fig-cap: "Visual diagnostics with posterior RSP and MSP Z-residuals for HNB and NB models fitted to one HNB-generated dataset."
+#| fig-width: 13
+#| fig-height: 9.5
+#| out-width: 100%
+#| dpi: 300
+#| message: false
+#| results: false
+
+irep_rsp <- 2
+irep_msp <- 1
+
+z_hnb_rsp_vec <- as.numeric(as.matrix(z_hnb_rsp_post)[, irep_rsp])
+z_hnb_msp_vec <- as.numeric(as.matrix(z_hnb_msp_post)[, irep_msp])
+z_nb_rsp_vec  <- as.numeric(as.matrix(z_nb_rsp_post)[, irep_rsp])
+z_nb_msp_vec  <- as.numeric(as.matrix(z_nb_msp_post)[, irep_msp])
+
+sw_hnb_rsp_post <- Zresidual::upper_bound_pvalue(sw.test.zresid(z_hnb_rsp_post))
+sw_hnb_msp_post <- Zresidual::upper_bound_pvalue(sw.test.zresid(z_hnb_msp_post))
+sw_nb_rsp_post  <- Zresidual::upper_bound_pvalue(sw.test.zresid(z_nb_rsp_post))
+sw_nb_msp_post  <- Zresidual::upper_bound_pvalue(sw.test.zresid(z_nb_msp_post))
+
+ylim_all <- range(
+  z_hnb_rsp_vec,
+  z_hnb_msp_vec,
+  z_nb_rsp_vec,
+  z_nb_msp_vec,
+  -4,
+  4,
+  na.rm = TRUE
+)
+
+op <- par(no.readonly = TRUE)
+par(mfrow = c(3, 4), mar = c(4, 4, 3, 1), oma = c(0, 0, 1, 0), cex = 0.95)
+
+plot(
+  z_hnb_rsp_post,
+  zcov = zcov_hnb,
+  irep = irep_rsp,
+  ylim = ylim_all,
+  main.title = expression("(a) HNB, " * Z^"Post-RSP" * " Scatterplot")
+)
+
+plot(
+  z_hnb_msp_post,
+  zcov = zcov_hnb,
+  irep = irep_msp,
+  ylim = ylim_all,
+  main.title = expression("(b) HNB, " * Z^"Post-MSP" * " Scatterplot")
+)
+
+plot(
+  z_nb_rsp_post,
+  zcov = zcov_nb,
+  irep = irep_rsp,
+  ylim = ylim_all,
+  main.title = expression("(c) NB, " * Z^"Post-RSP" * " Scatterplot")
+)
+
+plot(
+  z_nb_msp_post,
+  zcov = zcov_nb,
+  irep = irep_msp,
+  ylim = ylim_all,
+  main.title = expression("(d) NB, " * Z^"Post-MSP" * " Scatterplot")
+)
+
+qqnorm(
+  z_hnb_rsp_post,
+  irep = irep_rsp,
+  main.title = expression("(e) HNB, " * Z^"Post-RSP" * " QQ Plot"),
+  cex.main = 1.1,
+  cex.lab = 0.95,
+  cex.axis = 0.9,
+  legend.settings = list(cex = 0.85)
+)
+
+qqnorm(
+  z_hnb_msp_post,
+  irep = irep_msp,
+  main.title = expression("(f) HNB, " * Z^"Post-MSP" * " QQ Plot"),
+  cex.main = 1.1,
+  cex.lab = 0.95,
+  cex.axis = 0.9,
+  legend.settings = list(cex = 0.85)
+)
+
+qqnorm(
+  z_nb_rsp_post,
+  irep = irep_rsp,
+  main.title = expression("(g) NB, " * Z^"Post-RSP" * " QQ Plot"),
+  cex.main = 1.1,
+  cex.lab = 0.95,
+  cex.axis = 0.9,
+  legend.settings = list(cex = 0.85)
+)
+
+qqnorm(
+  z_nb_msp_post,
+  irep = irep_msp,
+  main.title = expression("(h) NB, " * Z^"Post-MSP" * " QQ Plot"),
+  cex.main = 1.1,
+  cex.lab = 0.95,
+  cex.axis = 0.9,
+  legend.settings = list(cex = 0.85)
+)
+
+hist(z_hnb_rsp_vec, breaks = "FD", probability = TRUE, main = expression("(i) HNB, " * Z^"Post-RSP" * " Marginal"), xlab = "Z-residual", xlim = ylim_all)
+lines(stats::density(z_hnb_rsp_vec, na.rm = TRUE), lwd = 2)
+curve(stats::dnorm(x), add = TRUE, lty = 2, lwd = 2)
+legend("topright", legend = c("Observed density", "N(0,1) reference"), lty = c(1, 2), lwd = 2, bty = "n", cex = 0.75)
+
+hist(z_hnb_msp_vec, breaks = "FD", probability = TRUE, main = expression("(j) HNB, " * Z^"Post-MSP" * " Marginal"), xlab = "Z-residual", xlim = ylim_all)
+lines(stats::density(z_hnb_msp_vec, na.rm = TRUE), lwd = 2)
+curve(stats::dnorm(x), add = TRUE, lty = 2, lwd = 2)
+
+hist(z_nb_rsp_vec, breaks = "FD", probability = TRUE, main = expression("(k) NB, " * Z^"Post-RSP" * " Marginal"), xlab = "Z-residual", xlim = ylim_all)
+lines(stats::density(z_nb_rsp_vec, na.rm = TRUE), lwd = 2)
+curve(stats::dnorm(x), add = TRUE, lty = 2, lwd = 2)
+
+hist(z_nb_msp_vec, breaks = "FD", probability = TRUE, main = expression("(l) NB, " * Z^"Post-MSP" * " Marginal"), xlab = "Z-residual", xlim = ylim_all)
+lines(stats::density(z_nb_msp_vec, na.rm = TRUE), lwd = 2)
+curve(stats::dnorm(x), add = TRUE, lty = 2, lwd = 2)
+
+par(op)
+```
+
+## PPC and HPC Checks
+
+The RSP versions use `randomized = TRUE`; the MSP versions use `randomized = FALSE`.
+
+```{r compute-ppc-hpc}
+#| code-fold: true
+#| message: false
+#| warning: false
+
+force_recompute_ppc_hpc_now <- if (exists("force_recompute_ppc_hpc")) {
+  isTRUE(force_recompute_ppc_hpc)
+} else {
+  isTRUE(force_recalc)
+}
+
+required_check_names <- c("HNB_RSP", "NB_RSP", "HNB_MSP", "NB_MSP")
+
+if (
+  !force_recompute_ppc_hpc_now &&
+    file.exists(ppc_file) &&
+    file.exists(hpc_file)
+) {
+  ppc_list <- readRDS(ppc_file)
+  hpc_list <- readRDS(hpc_file)
+
+  missing_ppc <- setdiff(required_check_names, names(ppc_list))
+  missing_hpc <- setdiff(required_check_names, names(hpc_list))
+
+  if (length(missing_ppc) || length(missing_hpc)) {
+    stop(
+      "Saved PPC/HPC files do not contain the expected names.\n",
+      "Missing from PPC list: ", paste(missing_ppc, collapse = ", "), "\n",
+      "Missing from HPC list: ", paste(missing_hpc, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+} else {
+  ppc_list <- list(
+    HNB_RSP = Zresidual::ppc(
+      fit = fit_hnb,
+      data = dat_hnb,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 60000 + sim_id,
+      randomized = TRUE
+    ),
+
+    NB_RSP = Zresidual::ppc(
+      fit = fit_nb,
+      data = dat_hnb,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 60001 + sim_id,
+      randomized = TRUE
+    ),
+
+    HNB_MSP = Zresidual::ppc(
+      fit = fit_hnb,
+      data = dat_hnb,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 60002 + sim_id,
+      randomized = FALSE
+    ),
+
+    NB_MSP = Zresidual::ppc(
+      fit = fit_nb,
+      data = dat_hnb,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 60003 + sim_id,
+      randomized = FALSE
+    )
+  )
+
+  hpc_list <- list(
+    HNB_RSP = Zresidual::hpc(
+      fit = fit_hnb_hpc,
+      newdata = dat_hnb_test,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 70000 + sim_id,
+      randomized = TRUE
+    ),
+
+    NB_RSP = Zresidual::hpc(
+      fit = fit_nb_hpc,
+      newdata = dat_hnb_test,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 70001 + sim_id,
+      randomized = TRUE
+    ),
+
+    HNB_MSP = Zresidual::hpc(
+      fit = fit_hnb_hpc,
+      newdata = dat_hnb_test,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 70002 + sim_id,
+      randomized = FALSE
+    ),
+
+    NB_MSP = Zresidual::hpc(
+      fit = fit_nb_hpc,
+      newdata = dat_hnb_test,
+      x = x_check,
+      ndraws = ndraws_use,
+      seed = seed_use + 70003 + sim_id,
+      randomized = FALSE
+    )
+  )
+
+  saveRDS(ppc_list, ppc_file)
+  saveRDS(hpc_list, hpc_file)
+}
+
+ppc_hnb_rsp <- ppc_list$HNB_RSP
+ppc_nb_rsp  <- ppc_list$NB_RSP
+ppc_hnb_msp <- ppc_list$HNB_MSP
+ppc_nb_msp  <- ppc_list$NB_MSP
+
+hpc_hnb_rsp <- hpc_list$HNB_RSP
+hpc_nb_rsp  <- hpc_list$NB_RSP
+hpc_hnb_msp <- hpc_list$HNB_MSP
+hpc_nb_msp  <- hpc_list$NB_MSP
+```
+
+## Replicated Z-residual p-values
+
+For a discrete response, RSP Z-residuals depend on auxiliary randomization. Before reporting a single summary table, the histograms below show the 500 replicated SW p-values produced by the posterior and ISCV RSP Z-residuals for each fitted model. The vertical red line marks the corresponding distribution-free upper-bound p-value used in the table.
+
+
+```{r replicated-zsw-histograms}
+#| fig-cap: "Replicated SW p-values from posterior and ISCV RSP Z-residuals for the HNB and NB models. Each histogram is based on 500 auxiliary randomizations; the red line marks the upper-bound p-value reported in the diagnostic table."
+#| fig-width: 10
+#| fig-height: 7
+#| out-width: 100%
+#| dpi: 300
+#| message: false
+#| warning: false
+#| results: false
+
+zsw_replicated_pvalues <- list(
+  HNB_Post_RSP = as.numeric(sw.test.zresid(z_hnb_rsp_post)),
+  HNB_ISCV_RSP = as.numeric(sw.test.zresid(z_hnb_rsp_iscv)),
+  NB_Post_RSP  = as.numeric(sw.test.zresid(z_nb_rsp_post)),
+  NB_ISCV_RSP  = as.numeric(sw.test.zresid(z_nb_rsp_iscv))
+)
+
+plot_zsw_hist <- function(pvals, main) {
+  pvals <- pvals[is.finite(pvals)]
+  ub <- Zresidual::upper_bound_pvalue(pvals)
+
+  hist(
+    pvals,
+    breaks = seq(0, 1, by = 0.05),
+    xlim = c(0, 1),
+    main = main,
+    xlab = "Replicated SW p-value",
+    ylab = "Frequency",
+    col = "gray90",
+    border = "white"
+  )
+
+  abline(v = ub, col = "red", lwd = 2)
+  legend(
+    "topright",
+    legend = paste0("upper bound = ", sprintf("%.3f", ub)),
+    bty = "n",
+    cex = 0.85,
+    text.col = "red"
+  )
+
+  invisible(ub)
+}
+
+op <- par(no.readonly = TRUE)
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1), oma = c(0, 0, 1, 0))
+
+plot_zsw_hist(
+  zsw_replicated_pvalues$HNB_Post_RSP,
+  expression("(a) HNB model: " * Z^"Post-RSP" * "--SW")
+)
+plot_zsw_hist(
+  zsw_replicated_pvalues$HNB_ISCV_RSP,
+  expression("(b) HNB model: " * Z^"ISCV-RSP" * "--SW")
+)
+plot_zsw_hist(
+  zsw_replicated_pvalues$NB_Post_RSP,
+  expression("(c) NB model: " * Z^"Post-RSP" * "--SW")
+)
+plot_zsw_hist(
+  zsw_replicated_pvalues$NB_ISCV_RSP,
+  expression("(d) NB model: " * Z^"ISCV-RSP" * "--SW")
+)
+
+par(op)
+```
+
+## Diagnostic Summary Table
+
+The table reports one p-value summary for each model and diagnostic. For posterior and ISCV RSP Z-residual SW tests, the entries are the upper-bound p-values computed from the 500 replicated p-values shown above. The MSP entries are one-dataset MSP Z-residual p-values, while the PPC and HPC entries are the corresponding predictive-check p-values.
+
+```{r s11-results-table}
+#| code-fold: true
+
+s11_table <- tibble::tibble(
+  Model = c("HNB (true)", "NB (wrong family)"),
+
+  Post_RSP_SW = c(
+    Zresidual::upper_bound_pvalue(zsw_replicated_pvalues$HNB_Post_RSP),
+    Zresidual::upper_bound_pvalue(zsw_replicated_pvalues$NB_Post_RSP)
+  ),
+  ISCV_RSP_SW = c(
+    Zresidual::upper_bound_pvalue(zsw_replicated_pvalues$HNB_ISCV_RSP),
+    Zresidual::upper_bound_pvalue(zsw_replicated_pvalues$NB_ISCV_RSP)
+  ),
+  PPC_RSP_SW = c(ppc_hnb_rsp$sw_rpp, ppc_nb_rsp$sw_rpp),
+  HPC_RSP_SW = c(hpc_hnb_rsp$sw_rpp, hpc_nb_rsp$sw_rpp),
+
+  Post_MSP_SW = c(
+    Zresidual::upper_bound_pvalue(sw.test.zresid(z_hnb_msp_post)),
+    Zresidual::upper_bound_pvalue(sw.test.zresid(z_nb_msp_post))
+  ),
+  ISCV_MSP_SW = c(
+    Zresidual::upper_bound_pvalue(sw.test.zresid(z_hnb_msp_iscv)),
+    Zresidual::upper_bound_pvalue(sw.test.zresid(z_nb_msp_iscv))
+  ),
+  PPC_MSP_SW = c(ppc_hnb_msp$sw_rpp, ppc_nb_msp$sw_rpp),
+  HPC_MSP_SW = c(hpc_hnb_msp$sw_rpp, hpc_nb_msp$sw_rpp),
+
+  Post_RSP_chisq = c(
+    zresid_chisq_pvalue(z_hnb_rsp_post, df = df_post[["HNB"]]),
+    zresid_chisq_pvalue(z_nb_rsp_post, df = df_post[["NB"]])
+  ),
+  ISCV_RSP_chisq = c(
+    zresid_chisq_pvalue(z_hnb_rsp_iscv, df = df_iscv[["HNB"]]),
+    zresid_chisq_pvalue(z_nb_rsp_iscv, df = df_iscv[["NB"]])
+  ),
+  PPC_y_chisq = c(ppc_hnb_rsp$chisq, ppc_nb_rsp$chisq),
+  HPC_y_chisq = c(hpc_hnb_rsp$chisq, hpc_nb_rsp$chisq)
+)
+
+s11_gt_tbl <- s11_table %>%
+  gt::gt() %>%
+  gt::tab_spanner(
+    label = "RSP Z-residual SW tests",
+    columns = c(Post_RSP_SW, ISCV_RSP_SW, PPC_RSP_SW, HPC_RSP_SW)
+  ) %>%
+  gt::tab_spanner(
+    label = "MSP Z-residual SW tests",
+    columns = c(Post_MSP_SW, ISCV_MSP_SW, PPC_MSP_SW, HPC_MSP_SW)
+  ) %>%
+  gt::tab_spanner(
+    label = gt::md("$\\chi^2$ tests"),
+    columns = c(Post_RSP_chisq, ISCV_RSP_chisq, PPC_y_chisq, HPC_y_chisq)
+  ) %>%
+  gt::cols_label(
+    Model = "Model",
+    Post_RSP_SW = "Post-RSP",
+    ISCV_RSP_SW = "ISCV-RSP",
+    PPC_RSP_SW = "PPC-RSP",
+    HPC_RSP_SW = "HPC-RSP",
+    Post_MSP_SW = "Post-MSP",
+    ISCV_MSP_SW = "ISCV-MSP",
+    PPC_MSP_SW = "PPC-MSP",
+    HPC_MSP_SW = "HPC-MSP",
+    Post_RSP_chisq = "Post-RSP",
+    ISCV_RSP_chisq = "ISCV-RSP",
+    PPC_y_chisq = gt::md("PPC $y$-$\\chi^2$"),
+    HPC_y_chisq = gt::md("HPC $y$-$\\chi^2$")
+  ) %>%
+  gt::fmt_number(columns = -c(Model), decimals = 3) %>%
+  gt::cols_align(align = "left", columns = Model) %>%
+  gt::cols_align(align = "center", columns = -c(Model)) %>%
+  gt::cols_width(
+    Model ~ gt::px(145),
+    c(
+      Post_RSP_SW, ISCV_RSP_SW, PPC_RSP_SW, HPC_RSP_SW,
+      Post_MSP_SW, ISCV_MSP_SW, PPC_MSP_SW, HPC_MSP_SW,
+      Post_RSP_chisq, ISCV_RSP_chisq, PPC_y_chisq, HPC_y_chisq
+    ) ~ gt::px(82)
+  ) %>%
+  gt::tab_options(
+    table.width = gt::px(1180),
+    table.font.size = gt::px(12),
+    data_row.padding = gt::px(4),
+    column_labels.padding = gt::px(4)
+  ) %>%
+  gt::tab_header(title = "Representative discrete-count example: diagnostic p-values")
+
+htmltools::div(
+  style = "width: 100%; overflow-x: auto; padding-bottom: 10px;",
+  htmltools::HTML(gt::as_raw_html(s11_gt_tbl, inline_css = TRUE))
+)
+```
+
+## Interpretation
+
+The HNB row corresponds to the model whose response family matches the data-generating mechanism. The NB row removes the hurdle component, so small SW or $\\chi^2$ p-values indicate that the fitted response family does not reproduce the residual distribution well. In this discrete-response example, the RSP-based Z-residual diagnostics are the primary residual checks because the auxiliary randomization restores the uniform reference scale before the transformation to standard-normal Z-residuals. The MSP columns are included as a deterministic midpoint comparison. PPC and HPC provide predictive-check benchmarks: PPC uses the full-data posterior predictive distribution, whereas HPC evaluates predictions on a held-out subset.

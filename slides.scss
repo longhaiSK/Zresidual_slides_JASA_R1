@@ -1,0 +1,36 @@
+/*-- scss:defaults --*/
+$heading-color: #00356B;
+$link-color: #0b26d8;
+$font-size-root: 32px;
+
+/*-- scss:rules --*/
+
+/* Brute-force blue headers */
+.reveal h2, 
+.reveal h3, 
+.reveal h4, 
+.reveal h5, 
+.reveal h6 {
+  color: #074bdd !important;
+}
+
+.reveal h1 {
+  color: #032eee !important;
+}
+
+/* Center the text horizontally on section-break slides */
+.reveal .slide.level2 h2,
+.reveal .slide.level1 h1 {
+  text-align: center;
+}
+
+/* Temporary debug frame to check for overflowing content */
+.reveal .slides section {
+  outline: 2px dashed rgb(220, 13, 13) !important;
+}
+
+/* Class applied via the menu toggle to turn OFF the frames */
+body.hide-debug .reveal .slides section {
+  outline: none !important;
+}
+

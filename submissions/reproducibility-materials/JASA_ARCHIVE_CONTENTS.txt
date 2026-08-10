@@ -1,0 +1,13 @@
+This lightweight JASA submission archive contains:
+
+- the Zresidual R package source and documentation source;
+- the precompiled pkgdown website under docs/, including docs/index.html;
+- Getting Started and the main package introduction;
+- the Illustration and Animation pages and their small source assets;
+- manuscript-related Quarto source vignettes and precompiled HTML pages;
+- the real dolphin-sighting dataset DolphinsThailandV2.csv.
+
+To satisfy the submission size limit, the archive excludes Git history,
+Quarto caches, simulation datasets, fitted simulation objects, PPC/HPC cache
+objects, Z-residual cache objects, renv package libraries, and unrelated demo
+source/pages. The full archive remains available through Figshare.

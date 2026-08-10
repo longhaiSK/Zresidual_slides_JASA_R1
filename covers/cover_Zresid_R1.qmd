@@ -1,0 +1,45 @@
+---
+format: typst
+---
+
+```{=typst}
+
+#import "@local/letterstyle:0.1.0": custom-letter 
+#show: doc => custom-letter(
+  subject: [Cover Letter for "Z-residuals for Diagnosing Bayesian Models"],
+  // 1. Define the root folder relative to this .qmd file
+  image-dir: "images/",
+  // 2. Keep these paths relative to the 'template-root'
+  header-image: "usaskdepthead.png", 
+  recipient: "JASA Editors",
+  recipient-address: none,
+  sender-name: [Longhai Li \ On behalf of all the authors],
+  sender-title: "",
+  signature-image: none,//"lhsigblue.png", //"lhsigblk.png"
+  // Pass the document content
+  doc
+)
+#set text(font: "New Computer Modern", size: 11pt)
+
+
+
+```
+
+
+We are pleased to resubmit our manuscript, **"Z-residuals for Diagnosing Bayesian Models" (manuscript#: 252307901-R1)**, for consideration for publication in the *Journal of the American Statistical Association*.
+
+We sincerely thank you and the referees for your time, valuable feedback, and general appreciation of the paper. Guided by these collective insights, we have substantially revised the manuscript. We have responded to the reviewers' comments item by item in the accompanying response letters. 
+
+We highlight briefly the major changes as follows:
+
+  1. **Refined positioning of the proposed methods.** We have clarified the innovation and accuracy of the Z-residual diagnostics, with more precise connections to, and contrasts with, existing approaches, including posterior, holdout predictive checks, and the recently proposed uniform parametrization checks. These additions delineate where the summarize-first, then-test framework departs from existing methods and why it yields well-calibrated and more powerful diagnostics.
+
+  2. **Substantially enhanced simulation studies.** The simulations now cover a broader range of data types, including a new continuous inverse-Gaussian regression study, along with additional sensitivity analyses. They demonstrate that the proposed diagnostics maintain valid Type-I error control while achieving markedly higher power than competing methods; several studies are presented in the Supplementary Material.
+
+  3. **Expanded discussion of limitations and extensions.** Section 5 now includes a candid discussion of the limitations of the proposed methods, together with concrete proposals for extending and improving them.
+
+  4. **Improved and extended R package.** The `Zresidual` R package is now highly extensible to custom models through user-supplied RSP functions, offers full support for `brms`, and includes new generic functions for PPC and HPC based on parameter-wise Z-residuals. The package, which also contains the processed dolphin-sighting data, is available at <https://figshare.com/s/00ac6b406e451c76e8e1> (anonymized version, to be replaced by GitHub/CRAN links upon acceptance).
+
+
+
+We deeply appreciate your rigorous evaluation of our work and hope the revised manuscript now meets the standards of *JASA*. We look forward to hearing from you.

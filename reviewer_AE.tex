@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb}
+\usepackage{url}
+\usepackage{natbib}
+\setlength{\parindent}{0em}
+\usepackage[letterpaper, total={6.5in, 9in}]{geometry}
+
+\newcommand*{\mybox}[2]{%
+  \par\medskip\noindent
+  \colorbox{#1!30}{\parbox{.98\linewidth}{#2}}%
+  \par\medskip
+}
+
+\setlength{\parskip}{0.5em}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{xr-hyper}   
+\makeatletter
+\newcommand{\myexternaldocument}[2][]{%
+  \externaldocument[#1]{#2}%
+  \IfFileExists{#2.aux}{}{%
+    \typeout{No file #2.aux.}%  
+  }%
+}
+\IfFileExists{newcommands.tex}{\input{newcommands}}{}
+
+\makeatother
+
+
+\myexternaldocument[S-]{supplement}
+
+
+\makeatother
+
+
+
+
+\begin{document}
+\begin{center}
+    {\LARGE \textbf{Response to the Associate Editor}} \\[1em]
+    {\large \today}
+\end{center}
+\vspace{2em} % Space between title and your text
+\normalsize
+
+
+We sincerely thank you for your time, valuable feedback, and general appreciation of the paper. Guided by the collective insights from you and other referees, we have substantially revised the manuscript. We have responded to your comments item by item, and your constructive suggestions have greatly improved both the methodology and the presentation. In this detailed response, we quote several updated passages for your reference (please note that some of these quoted excerpts may have been further refined in the final manuscript to ensure perfect flow and accuracy). In the revised manuscript, revised text is highlighted in \textred{orange}; for substantially rewritten sections, only the \textred{section title} is highlighted rather than the entire text. 
+
+
+\mybox{gray}{
+In addition to those comments raised by the reviewers,  please discuss when the Z-residuals would lead to a false detection.
+}
+
+\medskip
+
+Regarding your specific and important question about when Z-residuals might lead to false detections, we interpret this both specifically (practical scenarios leading to inflated Type I errors or misattributions) and broadly (inherent methodological limitations).
+
+\textbf{1. Multiple Testing Bias} \\
+Specifically, a primary source of false detection arises from multiple testing. If an analyst uses Z-residuals to hunt for correlated features among a large pool of candidate covariates without adjustment, the procedure is prone to false positives. We have emphasized this in Section 2.5, adding the following guidance:
+
+\begin{quote}
+``if Z-residuals are used to hunt for correlated features among a large pool of unused covariates, or if a vast battery of pre-specified tests is deployed to criticize a model, the procedure remains subject to multiple testing bias. In such scenarios, the results must be interpreted with caution and accompanied by robust multiplicity corrections. Appropriate strategies include established false discovery rate controls \citep{Benjamini1995}, E-value calibration techniques \citep{VovkVladimir2021ECCA, RamdasAaditya2023GSaS}, or data-splitting methods that reserve a hold-out set for final model evaluation.''
+\end{quote}
+
+\textbf{2. ISCV Variance Inflation and Dependence} \\
+A second cause of false detections (inflated Type I error rates) occurs under the importance-sampling cross-validatory (ISCV) framework in finite samples. Because ISCV Z-residuals suffer from structural variance inflation and do not completely eliminate dependence, they can falsely reject the null more often than posterior Z-residuals. We clarify this in the Sec. 2.4 of the revised manuscript:
+
+\begin{quote}
+``In practice, we generally recommend posterior Z-residuals as the default tool for routine diagnostics of models without highly localized latent effects. While the cross-validatory construction is theoretically appealing because it alleviates the direct self-influence of $y_i$ on its own predictive distribution, ISCV Z-residuals are not exactly standard normal in finite samples—their variance is greater than 1 for high-leverage observations, akin to why frequentist ordinary least squares relies on studentized residuals. Furthermore, this construction does not completely eliminate dependence in the resulting LOO Z-residuals, as the training sets $\by_{-i}$ and $\by_{-j}$ share $n-2$ observations. In our simulations, this variance inflation and residual dependence, combined with importance-sampling approximation errors, resulted in higher Type I error rates for ISCV Z-residuals. Conversely, posterior Z-residuals are surprisingly more stable at smaller sample sizes, and their double-use bias vanishes asymptotically as they converge to standard normal (as justified in the appendix). Nevertheless, because ISCV computation is fast, it is good practice to compute both, as a substantial discrepancy between the two is itself informative—typically flagging highly influential observations or unstable importance-sampling approximations (e.g., large Pareto $k$ diagnostic values). Finally, ISCV Z-residuals remain distinctly superior for models with observation-specific latent variables \citep{Li2016,Millar2018}, as including $y_i$ during fitting exerts an overwhelming influence on its corresponding latent effect.''
+\end{quote}
+
+\textbf{3. Cascading Misspecification (False Attribution)} \\
+An inadequate diagnostic procedure can lead to false conclusions about the \textit{source} of the error. For example, an unmodeled nonlinear covariate effect can cascade into the marginal distribution, causing a rejection in the marginal Z-residual QQ plot and SW test. This could lead an analyst to falsely conclude that the distributional family needs changing. To prevent this, we added the following to Section 2.5:
+
+\begin{quote}
+``It is worth noting that we do not prescribe a rigid order for model checking. Rather, effective model diagnostics should be regarded as a synthesis of diagnostic information aimed at identifying structural problems. \textit{For example, severe mean-structure misspecifications can cascade and cause failures in the \textit{marginal} QQ and SW checks.} By jointly evaluating these marginal metrics alongside covariate-specific plots and AOV tests, the analyst can better untangle these cascading effects and identify the true cause of the misfit.''
+\end{quote}
+
+\textbf{4. Broad Methodological Limitations} \\
+Finally, interpreting your question more broadly, we recognize an inherent limitation of Z-residuals when compared to internal structural checks like PPC, HPC, or the new UPC. Because Z-residuals strictly check the observation-level predictive distribution against $y_i$, they can falsely ``clear'' a model (a false negative, or failing to detect structural flaws) if the misspecification lies deep within the model's internal hierarchy (e.g., poorly specified priors or latent structures) but does not strongly manifest at the observation level. We explicitly address this limitation in Section 5:
+
+\begin{quote}
+``The core strength of the Z-residual framework lies in assessing the approximated predictive distribution (posterior or ISCV) against the actually observed $y_i$. Because this predictive distribution converges to the true data-generating distribution as the sample size increases, our method yields observation-level residuals that are asymptotically normal under the null. However, this strict observation-level focus entails an inherent \textbf{limitation}: the method is largely insensitive to non-observation-level components, such as latent variables, hierarchical effects, and priors. Consequently, the proposed Z-residuals are less effective at detecting misspecification within a model's internal structure.
+
+
+To address this limitation, a highly promising direction for future work is to extend the RSP framework to the evaluation of internal model components, drawing inspiration from Uniform Parametrization Checks (UPC) \citep{covington2025bayesian}. $\cdots$ Combining UPC's novel perspective on internal random components with the asymptotic stability of our ``summarize-first'' RSP framework offers an interesting avenue for diagnosing latent structures. For this combination to succeed, the primary methodological challenge will be to formally define what constitutes an ``observed'' value for these internal components, so that their corresponding RSPs can be validly constructed and assessed.
+''
+\end{quote}
+
+\setlength{\bibsep}{0.2em}
+\bibliographystyle{agsm}
+\bibliography{ref}
+
+
+\end{document}

@@ -1,0 +1,31 @@
+\begin{thebibliography}{xx}
+
+\harvarditem{Choi \harvardand\ Ramamoorthi}{2008}{Choi2008Remarks}
+Choi, T. \harvardand\ Ramamoorthi, R.~V.  \harvardyearleft
+  2008\harvardyearright , Remarks on consistency of posterior distributions,
+  {\em in} `Pushing the {{Limits}} of {{Contemporary Statistics}}:
+  {{Contributions}} in {{Honor}} of {{Jayanta K}}. {{Ghosh}}', Vol.~3,
+  Institute of Mathematical Statistics, pp.~170--187.
+
+\harvarditem{Ghosal \harvardand\ van~der Vaart}{2007}{ghosal2007convergence}
+Ghosal, S. \harvardand\ van~der Vaart, A.~W.  \harvardyearleft
+  2007\harvardyearright , `Convergence rates of posterior distributions for
+  non-i.i.d. observations', {\em The Annals of Statistics} {\bf
+  35}(1),~192--223.
+
+\harvarditem{Johnson}{2007}{johnson_bayesian_2007}
+Johnson, V.~E.  \harvardyearleft 2007\harvardyearright , `Bayesian model
+  assessment using pivotal quantities', {\em Bayesian Analysis} {\bf
+  2}(4),~719--733.
+
+\harvarditem{Shao}{2008}{shao2008}
+Shao, J.  \harvardyearleft 2008\harvardyearright , {\em Mathematical
+  Statistics}, Springer Texts in Statistics, Springer.
+\newblock Accessed via ProQuest Ebook Central.
+
+\harvarditem{Yuan \harvardand\ Johnson}{2012}{yuan_goodness--fit_2012}
+Yuan, Y. \harvardand\ Johnson, V.~E.  \harvardyearleft 2012\harvardyearright ,
+  `Goodness-of-{{Fit Diagnostics}} for {{Bayesian Hierarchical Models}}', {\em
+  Biometrics} {\bf 68}(1),~156--164.
+
+\end{thebibliography}

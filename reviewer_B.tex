@@ -1,0 +1,416 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb}
+\usepackage{url}
+\usepackage{natbib}
+\setlength{\parindent}{0em}
+\usepackage[letterpaper, total={6.5in, 9in}]{geometry}
+
+\newcommand*{\mybox}[2]{%
+  \par\medskip\noindent
+  \colorbox{#1!30}{\parbox{.98\linewidth}{#2}}%
+  \par\medskip
+}
+
+\setlength{\parskip}{0.5em}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{xr-hyper}   
+\makeatletter
+\newcommand{\myexternaldocument}[2][]{%
+  \externaldocument[#1]{#2}%
+  \IfFileExists{#2.aux}{}{%
+    \typeout{No file #2.aux.}%  
+  }%
+}
+\IfFileExists{newcommands.tex}{\input{newcommands}}{}
+
+\makeatother
+
+
+\myexternaldocument[S-]{supplement}
+
+
+\makeatother
+
+
+
+
+
+\begin{document}
+\begin{center}
+    {\LARGE \textbf{Response to Reviewer B}} \\[1em]
+    {\large \today}
+\end{center}
+\vspace{2em} % Space between title and your text
+\normalsize
+
+We sincerely thank you for your time, valuable feedback, and general appreciation of the paper. Guided by the collective insights from you and other referees, we have substantially revised the manuscript. We have responded to your comments item by item, and your constructive suggestions have greatly improved both the methodology and the presentation. In this detailed response, we quote several updated passages for your reference (please note that some of these quoted excerpts may have been further refined in the final manuscript to ensure perfect flow and accuracy). In the revised manuscript, revised text is highlighted in \textred{orange}; for substantially rewritten sections, only the \textred{section title} is highlighted rather than the entire text. 
+
+\section*{Overall Comments}
+
+\mybox{gray}{\textbf{1 Summary.} The manuscript deals with the problem of diagnosing Bayesian models using randomised survival probabilities (RSPs) based on full posterior draws, as well as leave-one-out (LOO) posterior draws. The authors develop theoretical guarantees relating to the asymptotic uniformity of these RSPs under both full posterior and LOO posterior draws, and present some numerical demonstrations on simulated and real data demonstrating their promise. \\
+I will quickly give some context on my own expertise, and thus my interests and limitations as a reviewer. My work has primarily focussed on understanding the theoretical characteristics of Bayesian prediction, prior elicitation, and model selection. While I have come across some of the methods discussed in this manuscript, and some other literature which I believe to be related but unreferenced by the authors, my own related expertise lies in using cross-validation for the same ambitions. As such, I apologise in advance should some of my comments be misguided.\\[5pt]
+\textbf{1.1 Overall evaluation.} Bayesian model diagnostics, and in particular predictive diagnostics, are becoming increasingly important in our field. And many of the approaches I have seen used in practice exist without the theoretical guarantees the authors have developed here. As such, I believe the ambition of this manuscript to be very well placed. The writing of this manuscript, however, leads me to be unclear as to where the authors' contributions lie. In particular, I believe much of the manuscript could be trimmed and cut down to reveal more clearly the fundamental notions and intuition which are missing for a reader such as myself. And given the apparent empirical benefits of this direction, I would like to see a greater variety in numerical examples. This, in combination with my principal concern that much of what the authors claim as novelty appears to me to be pre-existing, at least in spirit, in unreferenced literature and software, leads me to be unconvinced as to the manuscript's readiness for publication in its current form. I believe that many of my points below could be handled by the authors, and with some clarification and editing, this manuscript could potentially fill a gap which I feel is indeed missing in the literature and would be valuable to the readership of the Journal of the American Statistical Association and beyond.}
+
+
+\paragraph{Response:} 
+
+We sincerely thank the reviewer for their time, careful reading, and constructive feedback. We are highly encouraged by your recognition that ``Bayesian model diagnostics, and in particular predictive diagnostics, are becoming increasingly important in our field.'' We also deeply appreciate your encouraging assessment that this work ``could potentially fill a gap which I feel is indeed missing in the literature and would be valuable to the readership of the Journal of the American Statistical Association.''
+
+Regarding your concern about novelty, we agree that the specific techniques used to construct Z-residuals may appear plain, particularly to those familiar with statistical learning. However, the core contribution of this paper lies in demonstrating that the \textit{combination} of these techniques yields exceptionally well-calibrated and powerful diagnostic tools. While the individual mathematical components may be established, the development of a cohesive, theoretically justified residual diagnostic framework as a whole is highly novel to applied Bayesian statistics. 
+
+We have thoroughly revised the manuscript to streamline the exposition, clarify our fundamental contributions, and address your specific points regarding missing literature and numerical examples. Please find our detailed responses below.
+
+
+
+\section*{Major comments}
+
+\mybox{gray}{\textbf{2.1a Clarity of novelty and historical context.} My principal concern with the manuscript in its current state is the clarity of its novelty. In particular, the authors point out that the RSP transform is distributionally equivalent to the probability integral transform (PIT). Well, the use of PIT and the leave-one-out version of the PIT (LOO-PIT) for model diagnostics is not a novel idea: it was first discussed, to the best of my knowledge, in a reference which I would consider a somewhat critical omission from the manuscript (Gelfand et al., 1992, and in particular the discussion provided by Prof. Francoise Seillier-Moiseiwitsch). And the theoretical results the authors present seem to me to be closely related to pre-existing results mentioned therein: see, e.g., Theorem 2.1 of O'Reilly and Quesenberry (1973), Theorem 1 of Seillier-Moiseiwitsch and Dawid (1993), and the review paper of Seillier-Moiseiwitsch and Seillier-Moiseiwitsch (1993). While these results are slightly different from what the authors present---namely some of them assume a natural ordering of data, though not all---it is not clear to me how different they are, and the importance of these differences in terms of the fundamental message and novelty of the manuscript at hand. Do I understand correctly that the primary contribution of the manuscript is a synthesis and extension of these previous contributions to new theoretical results which are missing in the literature? Or is the p-value-style testing itself the authors feel is novel? [...] At the very least, a thorough literature review making clear what results are already available, what tools are already implemented in software, synthesising these into a unified framework, and thus clarifying the gaps in the literature which the authors would endeavour to fill would greatly aid the manuscript.}
+
+\paragraph{Response:}
+We thank the reviewer for this insightful critique and for pointing out the historical references. We agree that the manuscript needs to be clearer about its exact contributions, especially regarding the rich history of the probability integral transform (PIT) and its leave-one-out (LOO) variants. \textbf{Your understanding is entirely correct.} Our primary contribution is synthesizing and extending these foundational concepts into a versatile  residual framework for modern Bayesian regression diagnostics. 
+
+We entirely agree that the PIT and LOO-PIT are not novel concepts, and while Z-residuals (randomized quantile residuals) have been recently discussed much in frequentist statistics in the past decade, they remain largely absent from Bayesian model assessment. Therefore, our primary methodological contribution lies not in inventing these foundational concepts, but in synthesizing them into a framework for constructing \textbf{observation-level residual diagnostics} in applied Bayesian modeling. By combining randomized residuals with observation-level summaries over posterior or LOO predictive distributions, we address a critical, overlooked gap: the shift from overall model \textit{checking} to granular residual \textit{diagnostics}. Traditional goodness-of-fit (GOF) tests typically evaluate the overall distribution or rely on a single aggregate $p$-value to merely confirm or reject a model. In contrast, our expanded framework---supported by theoretical justification for its asymptotic calibration---facilitates rich exploratory analyses using standard graphical tools (e.g., scatterplots, boxplots, and quantile-quantile plots) alongside formal statistical tests. This enables practitioners to systematically pinpoint and understand specific structural flaws within the model. These tests include, but are not limited to: the ANOVA test for misspecified covariate functional forms (introduced in this paper); the Box-Ljung test for temporal autocorrelation; Moran's $I$ statistic for global spatial dependencies; and the Breusch-Pagan and Bartlett tests for heteroskedasticity. Ultimately, the proposed Z-residuals enable the seamless incorporation of the rich suite of frequentist diagnostic tools into Bayesian analysis.
+
+To bring the rich suite of residual diagnostic tools into Bayesian statistics, we introduce the following \textbf{specific methodological innovations} in this paper:
+\begin{itemize}
+    \item \textbf{A ``summarize-first, then-test'' paradigm:} We construct Z-residuals by integrating randomized survival probabilities (RSPs) over the posterior distribution prior to applying conventional diagnostic tools. This fundamentally diffs from the ``test-first, then-summarize'' approach used in traditional posterior predictive check (PPC), the newly proposed HPC and UPC, which evaluate discrepancy statistics for each MCMC draw and then summarizes the resulting $p$-values. Despite its conceptual simplicity, this reversal yields a diagnostic tool with solid theoretical foundations that unifies frequentist and Bayesian workflows. Notably, the construction of Z-residuals is independent of any specific test; therefore, they can be subsequently analyzed using numerous graphical or numerical diagnostic tools.
+    \item \textbf{Frequentist asymptotic justification:} We provide a rigorous theoretical proof demonstrating that the posterior and LOOCV RSPs are asymptotically uniformly distributed, and the resulting Z-residuals are asymptotically normally distributed from a strictly frequentist perspective. This theoretical grounding validates the application of existing frequentist residual diagnostic tools to Bayesian models. 
+    \item \textbf{A distribution-free upper-bound $p$-value:} To overcome the auxiliary randomization introduced for discrete responses, we provide a novel, distribution-free upper bound to reliably summarize replicated $p$-values (or, more broadly, dependent $p$-values). This technique has broad applicability beyond the current context.
+\end{itemize}
+
+\textbf{In terms of empirical findings}, this paper establishes the following critical points: 
+
+\begin{itemize}
+    \item Relying solely on the marginal distribution of PIT or Z-residuals for overall goodness-of-fit (GOF) checking is fundamentally inadequate. As we demonstrate, covariate-specific tests---such as the Z-AOV---successfully detect functional form misspecifications, highlighting how Z-residuals can be leveraged to diagnose a wide array of structural flaws. These subtle deficiencies are often completely masked when inspecting only the marginal distribution of PITs or relying on simple summary statistics that ignore relationships with covariates.
+    
+    \item Graphical diagnostics utilizing Z-residuals serve as powerful exploratory tools for \textit{discovering} unknown model deficiencies. Crucially, these visual insights guide the subsequent application of formal statistical tests, whether employing posterior/ISCV Z-residuals or conducting Z-residuals-PPC tests.
+    
+    \item Tests based on Z-residuals are well-calibrated and yield significantly higher statistical power than both traditional PPCs utilizing the $\chi^2$ statistic and Z-residual-based PPCs. This dual advantage in calibration and power is attributed to two key factors: (1) unlike arbitrary discrepancy measures, the exact distribution of Z-residuals is known under the true predictive distribution; and (2) our ``summarize-first, then-test'' paradigm asymptotically approximates this true predictive distribution, as formally justified by the theory presented in this paper.
+    
+    \item Our simulations demonstrate that  Z-residual-based PPCs mitigate the notorious conservatism of traditional $\chi^2$ PPCs. Because they average over the MCMC draws, they remain highly stable despite the auxiliary $\bm{U}$ drawn at each iteration, serving as a reliable secondary confirmation of model misfit.
+\end{itemize}
+
+ We have substantially revised Section 1 and Section 5, incorporating the above points to more clearly articulate our contributions and findings. We acknowledge the omission of the foundational references mentioned (Gelfand et al., 1992; O'Reilly \& Quesenberry, 1973; Seillier-Moiseiwitsch \& Dawid, 1993). We have extensively updated the literature review to explicitly discuss these earlier works. 
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.1b The ``order of operations'' difference.} The authors mention the difference in ``the order of operations'' (p.~12) between PPP and $Z$-residuals; it may be that I am confused about this difference and am referring above only to the former, in which case I believe a more concrete example (theoretical and numerical) would clarify this confusion.}
+
+\paragraph{Response:}
+
+The computational algorithms that explicitly outline this ``order of operations'' difference are detailed side-by-side in Table 1. To prevent further confusion, we have revised the title of Section 2.6 and the caption of Table 1 to reflect the true focus of this section: its primary purpose is to explain how to conduct PPCs using Z-residuals. Contrasting this approach with traditional PPCs and posterior/ISCV Z-residuals is now framed as the secondary focus, serving specifically to highlight the mechanical differences between the methods.
+
+This difference is the mathematical crux of why Z-residuals avoid the conservative bias of PPPs. 
+
+\begin{itemize}
+    \item \textbf{Test-first, then summarize (PPP):} For a traditional PPP, one computes a test statistic for each posterior draw $\bm{\theta}_k$, compares it to the observed data, and averages the results: 
+    \[
+    \text{PPP} = \frac{1}{K} \sum_{k=1}^K I\!\left(T(\bm{y}^{\text{rep}}_k, \bm{\theta}_k) > T(\bm{y}, \bm{\theta}_k)\right)
+    \]
+    Because $\bm{\theta}_k$ is drawn from a posterior already conditioned on $\bm{y}$, the replicated data $\bm{y}^{\text{rep}}_k$ is artificially close to $\bm{y}$, dragging the resulting $p$-value distribution toward $0.5$.
+    
+    \item \textbf{Summarize-first, then test (Z-residuals):} In our framework, we first average the observation-level probabilities over the posterior to get a single, stable estimate of the marginal survival probability, transform this to a normal scale, and \emph{then} compute a test statistic:
+    \[
+    z_i = -\Phi^{-1}\!\left( \frac{1}{K} \sum_{k=1}^K \text{RSP}_i(y_i \mid \bm{\theta}_k) \right)
+    \]
+    The diagnostic test statistic $T(\bm{z})$ is then calculated exactly once on this finalized set of residuals. As we prove in the manuscript, this approach integrates out the parameter-level bias asymptotically, leading to well-calibrated uniform $p$-values.
+\end{itemize}
+
+ 
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.1c Distinction from existing software.} A subsequent concern is that the use of PIT and LOO-PIT predictive diagnostics, at least in terms of testing their uniformity, is already common in applications and has already been implemented in open-source software including ArviZ in Python and bayesplot in R. As such, while the empirical promise of these tools is naturally very exciting, it does not seem to be specific to anything the authors have presented in their manuscript.}
+
+\paragraph{Response:}
+While tools like ArviZ and \texttt{bayesplot} offer LOO-PIT diagnostics, their focus on marginal uniformity often masks structural regression errors, and they lack the essential randomization step ($U_i$). To address this, we introduce the \textbf{Zresidual} package (CRAN/GitHub). It computes, graphs, and formally tests Z-residuals to detect subtle misspecifications---such as nonlinearity and heteroskedasticity---going well beyond simple goodness-of-fit checks. The package natively supports standard models (\texttt{glm}, \texttt{coxph}, \texttt{survreg}), Bayesian models (\texttt{brmsfit}), and custom models. We have expanded the ``Software'' section to detail these capabilities.
+
+
+
+\mybox{gray}{\textbf{2.2a Breadth of examples.} The authors present numerical demonstrations only for the negative binomial and hurdle negative binomial family. A more complete selection of model families would render these sections more convincing of the methods' empirical prowess. For instance, the authors show an example where one can diagnose the use of the wrong model family between two discrete families: could they extend this to choosing between a continuous and discrete family? For instance, in the following case study:
+\url{https://users.aalto.fi/~ave/casestudies/Nabiximols/nabiximols.html}}
+
+\paragraph{Response:}
+
+We thank the reviewer for suggesting the Nabiximols case study. However, our primary focus remains on diagnosing structural flaws (e.g., functional forms) rather than traditional goodness-of-fit checking, as we believe this offers greater practical impact. To address other reviewers' requests for diverse model families, we added a continuous inverse Gaussian simulation instead, and moved the original NB versus HNB family-misspecification example to the appendix. 
+
+To strengthen our numerical evaluations, all simulations now use 500 replications to reduce Monte Carlo error. Furthermore, we incorporated holdout predictive checks (HPCs) across all settings---including the new inverse Gaussian, nonlinear HNB, and appended wrong-family simulations. This ensures a comprehensive, side-by-side comparison of posterior Z-residuals, ISCV Z-residuals, PPCs, and HPCs across diverse misspecification scenarios.
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.2b LOO-CV in the real-world experiment.} The authors write in the theory section that the LOO-PIT (or LOO-RSP) approach can resolve many of the problems with the standard PIT (RSP) diagnostics. Yet the real-world experiment uses only RSP diagnostics and no LOO-CV equivalent. Can the authors please clarify why this is?}
+
+\paragraph{Response:}
+
+We have expanded the dolphin-sighting analysis so that Table 2 now reports both posterior and LOO-based diagnostics side by side. The reason we initially focused solely on the posterior Z-residuals is grounded in finite-sample stability. Although LOO is theoretically less biased, LOO residuals \textbf{are not exactly standard normal}—their variance is greater than 1 for high-leverage observations, akin to why frequentist OLS relies on studentized residuals. In our simulations, this property, combined with the approximation error of importance sampling (IS), resulted in higher Type-1 errors for the LOO Z-residuals. We found that posterior Z-residuals are actually  more stable at smaller sample sizes (surprising to us). Nevertheless, adding the LOO results clarifies their relationship in the applied example. For this dataset, both methods yield similar conclusions: the linear models show residual patterns against depth, while the nonlinear models do not. Note, however, our other studies have found that LOO Z-residuals are definitely superior than posterior Z-residuals in the models with observation-specific latent variables. 
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.2c Summary statistic for predictive performance.} Further, in their Table 2, the $\Delta$elpd and se columns related to the elpd relate to the mean and standard deviation of the normal approximation of the difference in predictive performance. One could produce a summary statistic from these two columns by computing $P(\Delta\mathrm{elpd}\ge 0)$ in R using \texttt{pnorm(0, delta\_elpd, se\_elpd, lower.tail = FALSE)}. Showing this as an additional column would help articulate their conclusions.}
+
+\paragraph{Response:}
+We have added a new column to Table~3 reporting the normal-approximation probability $\Pr(\Delta_{\mathrm{elpd}} \ge 0),$ computed from the leave-one-out $\Delta_{\mathrm{elpd}}$ and its standard error using \texttt{pnorm(0, delta\_elpd, se\_elpd, lower.tail = FALSE)}. Here $\Delta_{\mathrm{elpd}}$ is measured relative to the nonlinear HNB model, which is the reference model. The resulting probability is 0.002 for the linear HNB model and less than 0.001 for the other non-reference models. This additional summary further supports the nonlinear HNB model as the best predictive candidate among the fitted models.
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.2d Clarification of power numbers.} In Section 3.2 (p.~20) the authors write that the PPC test has ``significantly lower power (e.g., $\sim 0.05$ vs.\ $\sim 0.4$ for $n=50$)''; could the authors highlight where these numbers come from in the plot above, since it shows a great many different methods?}
+
+\paragraph{Response:}
+Regarding the numerical comparison mentioned by the reviewer from the earlier count-model simulation, we have clarified these values by adding legend symbols directly into the text: ``In contrast, the corresponding PPC is overly conservative, with Type I error rates near zero and significantly lower power (e.g., $\sim 0.036$ ($-\!\times\!-$) vs. $\sim 0.310$ ($-\!\triangle\!-$) for $n=50$).''  We have also supplemented the figures with tables in Supplementary S1.3 to facilitate the reading of these numbers. Please note that this entire simulation of this example has now been moved to Supplementary Section~S1.1.
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.2e Interpretation of replicated p-values.} A small numerical example at the beginning of Section 2.8 with visualisations would be very helpful in understanding what it would mean for ``a large proportion of small p-values'' to represent (p.~14).}
+
+\paragraph{Response:}
+We acknowledge that summarizing dependent $p$-values may be the most significant technical challenge when auxiliary randomization is used. Due to space limitations, we did not include an additional illustrative plot for this; instead, we refer readers to the histograms of replicated $p$-values provided in the real-data example (Figure 8). We agree that the term ``large number'' is somewhat vague, as we lack a known distribution for dependent $p$-values generated from the same dataset to determine a formal cutoff based on a probability metric. 
+
+To provide rigorous alternatives, Section 2.8 details an upper-bound $p$-value that is valid for any distribution, which is exceptionally useful in applied Bayesian modeling for decisively flagging severe model deficiencies. For situations requiring more precision, Section 5 outlines a bootstrap-style methodology to calculate an exact $p$-value directly from the replicated $p$-values. Furthermore, Z-residual-based PPCs also provide a highly satisfactory, single-number summary of these checks.
+
+
+
+\mybox{gray}{\textbf{2.3a Sensitivity and subjectivity of the test statistic.} On this point, I think that the authors should make clear that while it is true that p-values based on PPCs `depend heavily on the choice of test statistic'' (p.~1), the same seems also to be true for their $Z$-residuals. Ensuring that the language they employ does not hide this sensitivity, i.e.\ does not suggest that their approach entirely does away with the `subjectivity'' (p.~3) of choice of test statistic, seems important to me.}
+
+\paragraph{Response:}
+
+We thank the reviewer for highlighting this nuance. We have revised the manuscript to replace ``subjective'' with ``arbitrary.'' The word ``subjective'' is often misconstrued; great scientific discoveries are frequently subjective but rooted in empirical evidence and appropriate reasoning. The true weakness of standard PPCs is not subjectivity, but rather that the lack of guidance from the data modeling results makes the choice of test statistic fundamentally arbitrary. Our Z-residual framework solves this by making the choice of test statistic an evidence-based decision, driven directly by what is observed during the graphical assessment of the residuals.
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.3b `Well-chosen'' test statistics and reasonable defaults.} In their numerical examples, the authors show how in some instances some tests are `more powerful'' than others, and subsequently that there could exist some `well-chosen test statistic'' (p.~19) for a given problem. On this point I want to offer two comments: the first is whether we can tell ahead of time which test statistics are indeed `well-chosen''; [...] And if we are to pre-assign a set of tests, then which tests in particular do the authors propose as reasonable defaults?}
+\paragraph{Response:}
+We agree with the reviewer that selecting a ``well-chosen'' test statistic is non-trivial. We have revised the manuscript (Section 2.5) to clarify our underlying diagnostic philosophy: ideally, the choice of a test statistic should be informed by the observed residual patterns. A robust workflow begins by graphically inspecting the $Z$-residuals to uncover the nature of the structural flaws, and then applying the specific test that formally quantifies the observed discrepancy. 
+
+However, when a specific type of model departure is suspected---or when practitioners require a pre-assigned set of baseline diagnostic checks---we do recommend specific tests as reasonable defaults based on our theoretical and empirical findings.
+
+For the task of \textbf{marginal checking} to assess overall distributional fit (e.g., suspecting an incorrect response family), we explicitly recommend the Shapiro-Wilk (SW) test as the default. To address the reviewer's point, we have added the following clarification to Section 2.5 regarding why the SW test is superior to a standard $\chi^2$ goodness-of-fit approach:
+\begin{quote}
+``This iterative workflow typically begins with marginal checking to assess the overall distributional fit. Practitioners can check whether the $Z$-residuals approximately follow a normal reference distribution visually using a QQ plot, and numerically using a normality test such as the SW test. For marginal checking, we also explored a $\chi^2$ test, adjusting the degrees of freedom to account for posterior variance shrinkage. However, we do not recommend this test. As shown in our simulation studies, it might perform poorly due to severe sensitivity to residual variance deflation and inflation. The SW test is a better-calibrated choice.''
+\end{quote}
+
+For the task of detecting \textbf{functional form misspecification} (e.g., covariate non-linearity), we recommend the grouped ANOVA test (Z-AOV) as the default. Because this grouped approach does not assume a specific non-linear functional form, it provides a broadly powerful diagnostic test for arbitrary non-linearity. 
+
+Finally, we agree with the reviewer that formalizing diagnostic power is a critical pursuit. We have added a note to Section 5 clarifying that devising maximally powerful tests for specific data tasks, as well as designing structured combinations of tests to effectively differentiate between multiple overlapping sources of model deficiency, remain compelling topics for future work.
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.3c Multiple testing, hold-out folds, and E-values.} [...] the second is, in the event that we first choose a test statistic which yields no actionable information, whether we are at risk of some multiple testing concerns by performing a new test on the same residuals. In particular, do the authors suggest that we should enumerate all possible tests we would wish to perform ahead of time? Or that we should use different hold-out folds for different tests? If not, is there some intuition as to why this does not represent a concern for type I error guarantees? Could this be mitigated by some correction? Or the use of E-values (see Section 4.1 below)?}
+
+\paragraph{Response:}
+
+Thank you for raising this insightful question regarding multiple test bias. We have added the following paragraph in Sec 2.5 to address this issue:
+
+\begin{quote}
+``Finally, we wish to clarify that multiple comparison bias is generally not a primary concern in this context. The use of statistical tests in model diagnostics differs fundamentally from traditional scientific hypothesis testing. In scientific discovery, a significant result is the goal, and multiple testing inflates the risk of false discoveries. In model diagnostics, the goal is a well-fitting model, indicated by \textit{non-significant} $p$-values. An inflated Type-I error rate in this exploratory phase merely makes the diagnostic scrutiny more rigorous. If a test flags a ``significant'' model deficiency, it does not stand as a final conclusion, but rather triggers an iterative refinement process aimed at resolving the issue. Once a refined model yields non-significant $p$-values, it should then be further compared against previous iterations using independent predictive criteria, such as WAIC or LOOCV-IC \citep{Vehtari2017}, in addition to diagnostic $p$-values, to ensure genuine improvement. However, we note one important exception: if Z-residuals are used to hunt for correlated features among a large pool of unused covariates, or if a vast, pre-specified battery of tests is deployed to criticize a model, the procedure remains fully subject to multiple testing bias. In such scenarios, the results must be interpreted with caution and accompanied by robust multiplicity corrections. Appropriate strategies include established false discovery rate controls \citep{Benjamini1995}, E-value calibration techniques \citep{VovkVladimir2021ECCA, RamdasAaditya2023GSaS}, and data-splitting methods that reserve a hold-out set for final model evaluation.''
+\end{quote}
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{2.3d Impact of noise variables.} In Section 3.3 the authors write that ``the inclusion of noise variables in both models aims to provide a more realistic and robust testing environment'' (p.~21). Could they please comment on how the form of this noise affects their conclusions? That is, if the form of the model is correct but the noise is heavy-tailed, asymmetric, or comprised of point outliers, how do the conclusions of this experiment change?}
+
+\paragraph{Response:}
+
+We have changed the terminology from ``noise variables'' to `additional covariates'' to clarify that these are additional predictors used to increase dimensionality, rather than additive errors on the response (such as heavy-tailed noise, asymmetry, or point outliers). Furthermore, because we are working with conditional regression models, the specific probability distributions of these predictors have no effect on our overall conclusions, which is why we opted not to detail this minor point in the manuscript. As expected, having fewer non-relevant predictors generally leads to better statistical power and Type I error rates. We included these  covariates purely to simulate a more realistic, higher-dimensional testing environment.
+
+
+
+\section*{Minor comments}
+
+\mybox{gray}{\textbf{3.1 Assumptions for theoretical results.} In Theorem S2.2, the authors make the assumption that the model is well specified, yet their proof technique seems only to make use of the usual conditions required for posterior concentration, which occurs independently of model well specification. As such, I am not sure where they require this assumption for their result. In particular, in Step 1 of their proof of Theorem S2.3 (which overall does of course require the assumption of well specification), it may be that in the case of misspecification we would instead have
+\[
+\|P_i^{(n),CV} - P_i^{(*)}\|_{TV} \to \varepsilon > 0.
+\]
+If I have understood this correctly, could we extend their results to make this irreducible error appear in the final bound? That is, do the authors believe that it would be possible to derive a bound where the degree of misspecification, $\varepsilon$, is made explicit, and subsequently interpreted from a p-value?
+}
+
+\paragraph{Response:}
+We thank the reviewer for this insightful theoretical observation. The fundamental goal of model diagnostics is to seek a well-fitting model where, ideally, no misspecification exists. The reason we focus exclusively on deriving the theoretical properties under the null hypothesis (i.e., when the model is correctly specified) is that this null distribution serves as the essential reference distribution required to formally assess the observed Z-residuals. While we agree that extending the bounds to quantify the irreducible error $\varepsilon$ under misspecification is an interesting mathematical direction, our primary objective is practical model criticism. For this purpose, establishing the exact asymptotic behavior under the null is what provides practitioners with the rigorous baseline needed to calculate diagnostic $p$-values and flag structural departures.
+
+
+
+\mybox{gray}{\textbf{3.2a Intuition for randomization.} Adding some intuition for why (p.~8) ``the randomisation in the RSP is essential for ensuring a truly uniform distribution for discrete data'' would have helped my understanding.}
+
+\paragraph{Response:}
+We agree that providing this intuition is highly beneficial for readers. Accordingly, we have expanded Section~2.2 to include the following detailed explanation clarifying the necessity of the randomization:
+
+\begin{quote}
+``The randomization is needed when the response distribution has non-zero probability mass at the observed $y_i$. Discrete $y_i$ can be regarded as an incomplete observation of a continuous random variable, hence, an injected $U_i$ is necessary to recover it. Specifically, the survival function has a jump at \(y_i\), and without randomization all observations with the same discrete value would be mapped to the same survival probability. The auxiliary variable \(U_i\) randomly maps $y_i$ to a random number in the probability interval at this jump and thereby restoring the uniform reference distribution under the true model. A key property of this transformation is that if the model and parameters $\bm{\theta}$ are correct and the observations are independent, the resulting RSPs are independent standard uniform distribution; see Theorem~\ref{S-thm:rspunif} for a formal proof and a graphical illustration using a toy example. Detailed illustrations of the uniformity can be found in \citet{Dunn1996, FengCindy2020Acor}.''
+\end{quote}
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{3.2b Partitioning covariates.} Similarly (p.~10) it is not immediately clear to me, and perhaps some other less familiar readers, why ``partitioning $Z$-residuals into groups with respect to a covariate'' is required. Is this to mitigate multiple testing concerns?}
+
+\paragraph{Response:}
+
+We clarified in Section~2.5 that grouping is not intended for multiplicity correction. Instead, it serves as a specific formal test for non-linearity against a continuous covariate. We have added the following text:
+
+\begin{quote}
+
+``For a discrete covariate, any systematic trend can be formally evaluated by directly applying an AOV test across its natural categories to check for grouped mean changes, or Bartlett's test for heteroskedasticity. For a continuous covariate, we achieve this by first dividing its range into $k$ equally spaced intervals and then applying the same tests. Because this grouped AOV approach does not assume a specific non-linear function, it provides a broadly powerful, formal test for arbitrary non-linearity.''
+\end{quote}
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{3.2c Approximating standard normality.} And (p.~10) when the authors mention that ``$Z$-residuals are approximately standard normal'', is this approximation present only in the importance-sampling case? Or is this a pre-asymptotic statement? Again some clarification on where this bias emerges, and whether it can be quantified, would help greatly.}
+
+\paragraph{Response:}
+We have added this sentence to clarify the "approximation" after presenting the two asymptotic theorems (added in the revised version):
+
+\begin{quote}
+``The same argument extends to the posterior construction: posterior RSPs are
+likewise asymptotically independent and uniformly distributed
+(Theorems~\ref{S-thm:postrspunif} and \ref{S-thm:postrspindep}).
+Consequently, in large samples both posterior and ISCV Z-residuals behave
+approximately as an \emph{i.i.d.\ sample from the $N(0,1)$ distribution},
+so that well-behaved diagnostic procedures applied to them are
+asymptotically well-calibrated. We say ``approximately'' because
+both constructions incur pre-asymptotic error: the RSPs are averaged over
+the finite-sample posterior or LOO distribution of $\btheta$ rather than
+evaluated at the true $\btheta$, and ISCV incurs additional error from
+importance sampling.''
+\end{quote}
+
+
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{3.2d Degrees of freedom adjustment.} When discussing the adjustment to the degrees of freedom in the $\chi^2$ statistic (p.~11), the authors adjust $n$ (the number of data points) by $p_{\mathrm{eff}}$ (the effective number of parameters). Some further discussion on why this forms a valid adjustment, and the relationship between the number of data and the number of parameters, would again greatly aid comprehension.}
+
+\paragraph{Response:}
+We have added discussion in Section~2.5 framing this as a heuristic test rather than an exact distributional result. 
+
+We've added the following text:
+
+\begin{quote}
+For marginal checking, we also explored a $\chi^2$ GOF test, adjusting the degrees of freedom to account for posterior variance shrinkage. However, we do not recommend this test. It performed poorly in our simulations due to severe sensitivity to residual variance deflation and inflation, demonstrating that the SW test is a far better-calibrated choice.
+\end{quote}
+
+Indeed, our simulation studies confirms your conjecture of their poor performance due to sensitivity to variance inflation and deflation. We believe that such negative findings are valuable too. 
+
+% ---------------------------------------------------------
+
+\mybox{gray}{\textbf{3.2e Logical flow in Section 2.6.} In Section 2.6, the sentence starting with ``therefore'' (p.~11) does not follow immediately to me from what came before. Just another sentence here might help me and other readers understand more clearly.}
+
+\paragraph{Response:}
+
+I think the confusion is caused by the use of $\btheta$ rather than $\btheta\supt$. We have modified this part as follows:
+
+\begin{quote}
+    
+A key simplification for computing PPP follows from a basic testing principle  \citep{Meng1994}. Conditional on a parameter value $\btheta\supt$, a replicate $\by^{\text{rep}}$ is generated from the model specified by $\btheta\supt$, which is the true parameter for $\by^{\text{rep}}$. Therefore, if \(\pv(\by,\btheta\supt)\) is a well-calibrated test \(p\)-value conditional on \(\btheta\supt\), then \(\pv(\by^{\mathrm{rep}},\btheta\supt)\) is \textit{exactly} uniform on \((0,1)\). For a fixed observed value \(\pv(\by^{\mathrm{obs}},\btheta\supt)\), this implies that the conditional probability of the replicated $p$-value being smaller than the observed $p$-value is simply equal to the observed $p$-value itself:
+%\begin{equation}
+$P\big(\pv(\bY^{\text{rep}},\btheta\supt) < \pv(\by^{\text{obs}},\btheta\supt)\,|\, \btheta\supt\big) = \pv(\by^{\text{obs}},\btheta\supt).$
+%\end{equation}
+By the law of iterated expectations,
+\begin{equation}
+P\!\big(\pv(\bY^{\text{rep}},\bTheta) < \pv(\by^{\text{obs}},\bTheta) \,|\, \by\sobs\big)
+=\mathbb{E}_{\btheta\,|\, \by\sobs}\!\left[\pv(\by^{\text{obs}},\btheta)\right].
+\label{eqn:ppp-avg}
+\end{equation}
+Therefore, we need not replicate datasets for computing PPC $p$-value with the RSP Z–residuals. The $p$-value is simply the posterior average of the $p$-values computed on the observed data,
+\begin{equation}
+\widehat{\PPP}^{\text{RSP}} \;=\; \frac{1}{T}\sum_{t=1}^{T} \pv(\by\sobs,\btheta\supt).
+\end{equation}
+
+
+\end{quote}
+
+
+% ---------------------------------------------------------
+
+
+\mybox{gray}{\textbf{3.3 Plotting.} As mentioned above, many of the tools the authors propose seem to me to have already been implemented in software (e.g.\ by Gabry et al., 2019; Sailynoja et al., 2021, which could be referenced alongside Gelman et al., 2013). As such, presenting plots which are inline with pre-existing styles, or motivating the difference, would help some readers like me to understand the connection to this other, currently missing side of the literature.\\
+In Figure 1, plotting the marginal distribution of the $Z$-residuals would help articulate the point the authors make.}
+
+\paragraph{Response:}
+
+Thank you for this suggestion. To address your point regarding Figure 1, we have updated it (now Supplementary Figure S1) by adding a third row that displays the marginal distributions of the Z-residuals against a standard normal reference density. In the introduction section, we have also added references to Gabry et al. (2019) and Säilynoja et al. (2021) to better connect our work with existing software like bayesplot and ArviZ. 
+
+However, we wish to clarify an important distinction. While those existing tools provide valuable visualizations, they primarily focus on checking the marginal distributions of PITs. By evaluating Z-residuals on a standard normal scale, our framework expands upon this by embracing the full suite of classical frequentist residual diagnostics—combining these new marginal plots with observation-level scatterplots and QQ plots for a much more thorough evaluation of Bayesian models.
+
+
+
+
+\mybox{gray}{\textbf{3.4 Acronyms.} While the list of abbreviations is helpful, it is also very long and indicative perhaps of an opportunity to trim them down. At some points I found myself returning to it to ensure I understood what I was reading, which distracts from the flow of the manuscript. Further, some acronyms including ``QQ plots'' are never introduced nor are they present in this list.}
+
+\paragraph{Response:}
+Thank you for this feedback. We have revised the manuscript to improve readability by minimizing abbreviations:
+\begin{itemize}
+    \item \textbf{Expanded terms:} Low-frequency terms (e.g., cross-validation, goodness-of-fit) are now written out in full.
+    \item \textbf{Retained core acronyms:} High-frequency terms (e.g., RSP, PPC, ISCV) are kept to prevent formula and table clutter, but are clearly defined at first use.
+    \item \textbf{QQ Plots:} We explicitly define quantile-quantile (QQ) plots at their first appearance, as requested.
+    \item \textbf{Self-contained visuals:} Figure and table captions now spell out key tests (e.g., Shapiro-Wilk, AOV, Bartlett) so readers do not have to search for definitions.
+\end{itemize}
+
+
+
+\mybox{gray}{\textbf{3.5 Flowery wording.} The second sentence of the manuscript (p.~1), ``Statistical modelling without rigorous checking is akin to building a high-rise on sand---elegant in appearance but prone to collapse under scrutiny,'' is perhaps overly romantic in style, disjointed from the rest of the paper, and distracts from the rest of the introduction in my personal opinion.}
+
+\paragraph{Response:}
+
+Thank you for the feedback. We have deleted this sentence from the revised manuscript to maintain a more direct academic tone. We note, however, that the original intent of this analogy was to strongly emphasize a critical and pervasive challenge within the broader statistical community: the frequent prioritization of complex model building over rigorous model checking.
+
+
+
+\mybox{gray}{\textbf{3.6 Typos and notation.}
+\begin{enumerate}
+    \item (p.~2) the data are denoted in bold; specifying the space in which they live would help justify this.
+    \item (p.~3) the number $0.5$ comes out of thin air when discussing the bias of PPPs.
+    \item (p.~3) defining the survival probability function here would be very helpful in introducing the concepts of the paper, as opposed to only defining it in Appendix S2.2.
+    \item (p.~6) ``((in a measure-theoretic sense)'' has extra parentheses.
+    \item (p.~8) adding a reference to where the authors formally show that ``[u]nder the true model [...] $Z$-residuals are independent and identically distributed standard normal variables'' would help.
+    \item (p.~9) the notation around Equation 5 could be refined; it is currently quite heavy.
+    \item (p.~15) ``(supplementary))'' could be deleted, and has extra parentheses.
+\end{enumerate}}
+
+
+\paragraph{Response:}
+Thank you for your careful reading and for identifying these typos and notational issues; we have corrected them throughout the revised manuscript. To briefly summarize the key changes:
+\begin{itemize}
+    \item We explicitly defined the sample space $\mathbf{y} \in \prod_{i=1}^n\mathcal{Y}_i$ and the survival function $S_i(y\mid x_i,\theta)=P(Y_i>y\mid x_i,\theta)$ in Section~2.1.
+    \item We clarified the concentration of posterior predictive $p$-values around 0.5.
+    \item We explicitly linked RSP Z-residual standard normality to Theorem~S3.1.
+    \item We removed redundant parentheses and wording errors. 
+\end{itemize}
+
+While we acknowledge the notation around Equation~(5) is dense, we retained the explicit superscripts and subscripts to prevent ambiguity. Because our framework formally compares four distinct residual constructions (posterior RSP/MSP and ISCV RSP/MSP), this explicit bookkeeping is essential for clarity later in the manuscript. To assist readers, we have added an introductory sentence immediately before Equation~(5) to clearly unpack the components of this notation.
+
+
+
+\section*{Curiosity}
+
+\mybox{gray}{\textbf{4.1 E-values and multiple predictive testing.} Is there space for E-values (Grunwald et al., 2024) to replace the p-value-style tests the authors propose here? Do the authors believe this could resolve my question of multiple testing in Section 2.3?}
+
+\paragraph{Response:}
+Thank you for this insightful suggestion. We agree that the safe testing framework using E-values \citep{Grunwald2024} offers a highly promising alternative. As discussed previously, multiple comparison bias is generally not our primary concern for routine model diagnostics, because a ``significant'' $p$-value is not a terminal scientific discovery, but rather an internal signal to iteratively refine the model. However, if Z-residuals are used to systematically hunt for correlated features among a large pool of unused covariates, multiple testing bias becomes a critical issue. We believe E-values could elegantly resolve the multiplicity concerns in that specific exploratory scenario, avoiding the rigidities of traditional $p$-value corrections. We have added a discussion of this potential integration to Section~5.
+
+
+
+\mybox{gray}{\textbf{4.2 Rates of convergence.} The authors make the point at the beginning of Section 2.7 that ``for both the cross-validated and posterior constructions, the RSPs are asymptotically independent and uniformly distributed.'' Do we have any understanding of whether this occurs at the same rate for both constructions? And subsequently, at what rate they are indistinguishable from one another?}
+
+\paragraph{Response:}
+Thank you for this insightful theoretical question. While establishing the exact finite-sample rates of convergence is an interesting problem, we did not pursue this mathematical direction in depth, as our primary focus remains on the practical diagnostic utility of these tools. However, our intuition is that both the leave-one-out and full posterior predictive distributions should converge to the true predictive distribution at the exact same asymptotic rate. Because the difference between the full posterior and the leave-one-out posterior inherently diminishes as $n$ grows, the two resulting RSP constructions should couple and become indistinguishable from one another at that same rate.
+
+
+
+\mybox{gray}{\textbf{4.3 Beyond perfect model specification.} Related to Section 3.1 above, the authors have shown their theoretical results under correct model specification. While this is clearly the standard in the literature, I am sure the authors will agree that perfect model specification is a fantasy in reality. Do they believe that the sorts of results they have developed (e.g.\ Theorem S2.3 as well as Theorem S2.2), and those pre-existing in the literature, could be extended to notions of $\varepsilon$-misspecification as previously detailed? That is, where the model is misspecified, but perhaps not so gravely misspecified as to make a noticeable difference in reality?}
+
+\paragraph{Response:}
+Thank you for this insightful question. While perfect specification is rare, this reality is precisely why robust diagnostics are needed: rather than passively accepting misspecification, we strive to iteratively find models closer to the real data. To build valid diagnostics for this search, we must first establish exact reference distributions under the null hypothesis (correct specification) for proper calibration. Characterizing $\varepsilon$-misspecification concerns a test's power rather than its baseline calibration, which is why our theoretical focus remains restricted to the exact null setting.
+
+
+
+\setlength{\bibsep}{0.2em}
+\bibliographystyle{agsm}
+\bibliography{ref}
+
+
+
+\end{document}

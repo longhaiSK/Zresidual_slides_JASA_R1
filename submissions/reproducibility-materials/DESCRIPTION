@@ -1,0 +1,61 @@
+Package: Zresidual
+Type: Package
+Title: Z-residual: Computing and Diagnosing Gaussian-like Residuals
+Version: 0.1.0
+Authors@R: c(person(given = "Anonymous", family = "Author", role = c("aut","cre"),
+                    email = "anonymous@anonymous.com"),
+             person(given = "Anonymous", family = "Author", role = c("aut"),
+                    email = "anonymous@anonymous.com"),
+             person(given = "Anonymous", family = "Author", role = c("ctb"),
+                    email = "anonymous@anonymous.com"),
+             person(given = "Anonymous", family = "Author", role = c("ctb"),
+                    email = "anonymous@anonymous.com"))
+License: GPL-3
+Description: Provides a unified framework for computing and analyzing Z-residuals across a diverse range of statistical models. The package facilitates model diagnostics by transforming outputs from popular modeling frameworks—including 'coxph', 'survreg', 'glmmTMB', and 'brms'—into standardized Z-residuals. These tools enable researchers to assess model fit, identify outliers, and detect misspecification. In addition to standard residuals, the package implements cross-validatory variants to support robust predictive assessments and model validation workflows.
+URL: https://anonymous.github.io/Zresidual
+BugReports: https://github.com/anonymous/Zresidual/issues
+Depends: R (>= 3.5.0)
+Imports:
+    survival (>= 3.3-1),
+    stats,
+    graphics,
+    grDevices,
+    methods,
+    utils
+Suggests: 
+    brms,
+    matrixStats,
+    EnvStats,
+    nortest,
+    latex2exp,
+    betareg,
+    VGAM,
+    actuar,
+    dplyr,
+    stringr,
+    tidyr,
+    data.table (>= 1.10.0),
+    digest,
+    gridExtra,
+    HSAUR3,
+    knitr,
+    MASS,
+    mgcv (>= 1.8-13),
+    rmarkdown,
+    quarto,
+    testthat (>= 1.0.2),
+    DT,
+    pkgdown,
+    gifski,
+    av,
+    animation,
+    png,
+    pacman,
+    magick,
+    plotrix,
+    posterior
+VignetteBuilder: knitr, quarto
+LazyData: true
+RoxygenNote: 7.3.3
+Roxygen: list(markdown = TRUE)
+Encoding: UTF-8
