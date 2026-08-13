@@ -1,9 +1,19 @@
-/*-- scss:defaults --*/
-$heading-color: #b16309;
-$link-color: #3c53ea;
-$font-size-root: 40px;
+/* 1. Global Variables (Replacing SCSS Defaults) */
+:root {
+  --frame-outline-color: #083ddb; /* Pure Bright Gold */
+  --link-color: #3c53ea;
+  --font-size-root: 40px;
+}
 
-/*-- scss:rules --*/
+/* 2. Base Theme Overrides (What SCSS used to do automatically) */
+.reveal {
+  font-size: var(--font-size-root);
+}
+.reveal a {
+  color: var(--link-color);
+}
+
+/* 3. Your Custom Rules */
 
 /* Brute-force blue headers */
 .reveal h2, 
@@ -23,19 +33,18 @@ $font-size-root: 40px;
 .reveal .slide.level1 h1 {
   text-align: center;
 }
-
-
-/* Aesthetic slide frame attached to normal slide content only */
-.reveal .slides section:not(.title-slide):not(.level1):not(:has(section)) {
-  outline: 4px solid $heading-color !important; 
+.reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section)) {
+  outline: 4px solid var(--frame-outline-color) !important; 
   outline-offset: 30px !important; 
+  
+  /* This adds the rounded corners */
+  border-radius: 15px !important; 
 }
-
 /* Class applied via the menu toggle to turn OFF the frames */
-body.hide-debug .reveal .slides section {
+/* Class applied via the menu toggle to turn OFF the frames */
+body.hide-debug .reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section)) {
   outline: none !important;
 }
-
 /* Center standalone slide images and fill the available width by default.
    Scoped to images that are direct children of a slide (not inside a
    .columns/.column layout), so deliberately custom-sized images inside
@@ -48,6 +57,3 @@ body.hide-debug .reveal .slides section {
   width: 100%;
   height: auto;
 }
-
-
-

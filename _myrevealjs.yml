@@ -3,7 +3,8 @@ format:
   revealjs:
     html-math-method: katex
     chalkboard: true
-    theme: [serif, slides.scss]
+    theme: [serif]
+    css: slides.css
     width: 1600
     height: 1000
     slide-number: true
