@@ -14,6 +14,7 @@ date: "September 1, 2026"
 html-math-method: mathjax
 format: 
   revealjs: 
+    theme: serif
     embed-resources: false
 metadata-files:
   - ./_myrevealjs.yml
@@ -83,7 +84,7 @@ $$
 ## Limitations of PPC and HPC
 
 1. **Arbitrary Discrepancy Measures:**
-   The selection of the test statistic, $D(\by, \btheta)$, is inherently arbitray, lacking guidelines from data fitting results.
+   The selection of the test statistic, $D(\by, \btheta)$, is inherently arbitrary, lacking guidelines from data fitting results.
 
 2. **Masking of Structural Flaws:**
    Relying on simple, marginal statistics (e.g., mean, median, or standardized deviations as used in $\chi^2$ statistic) can yield a "passing" score while hiding critical deficiencies like misspecified covariate functional forms.
@@ -107,7 +108,7 @@ $$
   * $S_i$: Survival function $P(Y_i > y_i \mid \boldsymbol{\theta})$
   * $p_i$: Probability mass function $P(Y_i = y_i \mid \boldsymbol{\theta})$
   * $U_i \sim \text{Unif}(0,1)$: Auxiliary randomization
-* **Auxilliary Randomization $U_i$**
+* **Auxiliary Randomization $U_i$**
   * **Continuous**: $p_i = 0$, simplifies to the standard probability integral transform.
   * **Discrete**: Randomization ensures exact uniform distribution on $[0,1]$. Essentially, the randomization recovers the continuous latent constructs of a discrete $y_i$ by injecting random noise. 
 
