@@ -3,7 +3,7 @@ SRC="$Github/Zresid_Bayesian_JASA_R1"
 DEST="."
 
 # 1. Image and Plot Directories (from your original list)
-cp -r $SRC/plot/ $DEST
+cp -r $SRC/plot $DEST
 cp -r $SRC/slidesplot $DEST
 
 # 2. Slide Source Files (.qmd, .html, and associated _files folders)
