@@ -3,4 +3,4 @@ title: Bayesian Z-residual Slides
 format: html
 ---
 
-* [U of T, Sept 1, 2026](./slides_bayesian_zresid.html)
+## [U of T, Sept 1, 2026](./slides_bayesian_zresid.html)

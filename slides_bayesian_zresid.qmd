@@ -1,5 +1,5 @@
 ---
-title: "Z-residuals: A Versatile Diagnostic Framework for Bayesian Models1"
+title: "Z-residuals: A Versatile Diagnostic Framework for Bayesian Models"
 format: 
   revealjs: 
     embed-resources: false
