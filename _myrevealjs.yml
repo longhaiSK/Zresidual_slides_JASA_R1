@@ -15,22 +15,36 @@ format:
     number-depth: 1
     include-after-body: 
       text: |
-        <!-- 3. CSS to move the Menu to the Top-Left -->
+        <!-- 3. CSS to move the Menu and scale the Refresh button -->
         <style>
+          /* Move the Menu to the top-left */
           .reveal .slide-menu-button {
             top: 30px !important; 
-            bottom: auto !important; /* Forces it to forget its original bottom anchor */
+            bottom: auto !important; 
             left: 30px !important;
             margin: 0 !important;
           }
+          
+          /* Automatically shrink the refresh button on mobile screens (iPhones) */
+          @media (max-width: 500px) {
+            #custom-refresh-btn {
+              top: 65px !important; /* Tucks it slightly closer to the menu on small screens */
+              left: 31px !important; /* Keeps it perfectly centered under the smaller menu */
+            }
+            #custom-refresh-btn svg {
+              width: 16px !important; /* Shrinks the icon to match the mobile menu size */
+              height: 16px !important;
+            }
+          }
         </style>
 
-        <!-- 1. The hardcoded HTML Refresh Button (Stacked under the Menu) -->
-        <div title="Refresh Page" onclick="window.location.reload();" 
-             style="position: fixed; top: 75px; left: 32px; z-index: 2147483647; cursor: pointer; color: rgba(0, 0, 0, 0.4); transition: all 0.2s ease;"
+        <!-- 1. The hardcoded HTML Refresh Button -->
+        <div id="custom-refresh-btn" title="Refresh Page" onclick="window.location.reload();" 
+             style="position: fixed; top: 75px; left: 35px; z-index: 2147483647; cursor: pointer; color: rgba(0, 0, 0, 0.4); transition: all 0.2s ease;"
              onmouseover="this.style.transform='scale(1.1)'; this.style.color='rgba(0, 0, 0, 0.8)';" 
              onmouseout="this.style.transform='scale(1)'; this.style.color='rgba(0, 0, 0, 0.4)';">
-          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Default desktop size is set to 18px here -->
+          <svg viewBox="0 0 24 24" width="25" height="25" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
