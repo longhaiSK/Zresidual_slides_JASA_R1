@@ -1,7 +1,0 @@
-demo_brms_bernoulli
-demo_brms_pois
-demo_coxph_frailty
-demo_coxph_nphnl
-demo_cvz_frailty
-demo_glm_binomial
-demo_glm_poisson

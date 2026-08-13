@@ -1,9 +1,7 @@
 /*-- scss:defaults --*/
-$heading-color: #00356B;
-$link-color: #0b26d8;
-$font-size-root: 32px;
-
-/*-- scss:rules --*/
+$heading-color: #b16309;
+$link-color: #3c53ea;
+$font-size-root: 40px;
 
 /* Brute-force blue headers */
 .reveal h2, 
@@ -26,11 +24,24 @@ $font-size-root: 32px;
 
 /* Temporary debug frame to check for overflowing content */
 .reveal .slides section {
-  outline: 2px dashed rgb(220, 13, 13) !important;
+  outline: 0px dashed rgb(220, 13, 13) !important;
 }
 
 /* Class applied via the menu toggle to turn OFF the frames */
 body.hide-debug .reveal .slides section {
   outline: none !important;
+}
+
+/* Center standalone slide images and fill the available width by default.
+   Scoped to images that are direct children of a slide (not inside a
+   .columns/.column layout), so deliberately custom-sized images inside
+   column layouts are left untouched. */
+.reveal .slides section > p > img,
+.reveal .slides section > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: auto;
 }
 

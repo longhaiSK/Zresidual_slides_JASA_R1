@@ -1,6 +1,0 @@
-/.quarto/
-**/*.quarto_ipynb
-*_cache/
-*_files/
-*.rds
-*.RDS

@@ -1,101 +1,23 @@
 ---
 title: "Z-residuals: A Versatile Diagnostic Framework for Bayesian Models"
-metadata-files: 
-  - _custom_revealjs.yml
+format: 
+  revealjs: 
+    embed-resources: true
+  beamer: 
+    include-before-body: 
+      - newcommands.tex
+metadata-files:
+  - ./_myrevealjs.yml
 ---
- 
 
-## Outline {.unnumbered}
 
-1. **Introduction & Motivation**
-   * The Diagnostic Gap in Bayesian Modeling
-   * Limitations of Posterior Predictive Checks (PPC)
-2. **Methodology: The Z-residual Framework**
-   * Randomized Survival Probability (RSP)
-   * Posterior and ISCV Z-residuals
-   * Asymptotic Guarantees
-3. **Simulation Studies**
-   * Continuous Inverse Gaussian Regression
-   * Discrete Hurdle Negative Binomial Regression
-4. **Application to a Zero-inflated Dolphin-Sighting Dataset**
-
-5. **Conclusion & Future Directions**
-
-<div style="display: none;">
-$$
-% --- Custom Commands for MathJax ---
-
-\newcommand{\bm}[1]{\boldsymbol{#1}}
-
-% Acronyms and Custom Text
-\newcommand{\CVIC}{\text{CVIC}}
-\newcommand{\deviance}{\text{dev}}
-\newcommand{\dpois}{\text{dpois}}
-\newcommand{\ic}{\text{ic}}
-\newcommand{\nmsp}{\text{\scriptsize NMSP}}
-\newcommand{\nrsp}{\text{\scriptsize NRSP}}
-\newcommand{\pmin}{p_{\text{\scriptsize min}}}
-\newcommand{\pp}{\text{pp}}
-\newcommand{\nref}{[\textbf{references}]}
-\newcommand{\svf}{S_{i}(\cdot)}
-\newcommand{\unif}{\text{Unif}}
-\newcommand{\rsp}{\text{RSP}}
-\newcommand{\msp}{\text{MSP}}
-\newcommand{\PPP}{\text{PPP}}
-\newcommand{\PPPs}{\text{PPPs}}
-\newcommand{\PPC}{\text{PPC}}
-\newcommand{\bU}{\bm{U}}
-\newcommand{\pv}{\mathcal{P}}
-
-% Math Symbols (Bold)
-\newcommand{\btheta}{\bm{\theta}}
-\newcommand{\bTheta}{\bm{\Theta}}
-\newcommand{\bx}{\bm{x}}
-\newcommand{\by}{\bm{y}}
-\newcommand{\bY}{\bm{Y}}
-\newcommand{\bbeta}{\bm{\beta}}
-\newcommand{\bBeta}{\bm{\Beta}}
-\newcommand{\blambda}{\bm{\lambda}}
-\newcommand{\bmu}{\bm{\mu}}
-\newcommand{\bphi}{\bm{\phi}}
-\newcommand{\bp}{\bm{p}}
-\newcommand{\bsgm}{\bm{\sigma}}
-\newcommand{\hu}{\pi^o_{i}}
-\newcommand{\mhu}{\pi^o}
-
-% General Superscripts and Subscripts
-\newcommand{\obs}{^{\text{obs}}}
-\newcommand{\sobs}{^{\text{obs}}}
-\newcommand{\post}{^{\text{Post}}}
-\newcommand{\cv}{^{\text{CV}}}
-\newcommand{\iscv}{^{\text{ISCV}}}
-\newcommand{\supt}{^{(t)}}
-\newcommand{\mci}{^{(t)}}        
-\newcommand{\mcs}{^{(s)}}
-\newcommand{\rep}{^{\text{rep}}}
-\newcommand{\ppc}{_{\text{ppc}}}
-\newcommand{\noi}{_{-i}}
-\newcommand{\wi}{_{1:n}}
-\newcommand{\IS}{^{\text{\scriptsize IS}}}
-
-% Compound Superscripts for Z-residuals
-\newcommand{\rspp}{^{\text{Post-RSP}}}
-\newcommand{\mspp}{^{\text{Post-MSP}}}
-\newcommand{\rspis}{^{\text{ISCV-RSP}}}
-\newcommand{\mspis}{^{\text{ISCV-MSP}}}
-\newcommand{\rsppost}{^{\text{Post-RSP }}} 
-\newcommand{\rspiscv}{^{\text{ISCV-RSP}}} 
-\newcommand{\E}{\mathbb{E}}
-\newcommand{\Epost}{\mathbb{E}_{\btheta \mid \by}}
-\newcommand{\Ecv}{\mathbb{E}_{\btheta \mid \by_{-i}}}
-\newcommand{\highlight}[1]{\textcolor{blue}{#1}}
-\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-\newcommand{\textred}[1]{\textcolor{orange}{#1}}
-$$
-</div>
 
 
 # Introduction
+
+::: {.content-visible when-format="html"}
+{{< include slides_macros.tex >}}
+:::
 
 ## Where We Stand: Current Model Checking Methods
 
@@ -119,40 +41,37 @@ $$
   * **Diagnostic Richness:** Enables the use of familiar graphical tools (scatterplots, QQ plots) and structural tests (ANOVA, Shapiro-Wilk) on a single set of residuals.
   * **Preserved Power:** Utilizes the full sample size to detect model misspecifications without the reductions required by holdout methods.
 
-# Posterior Predictive Checks
+# Posterior and Holdout Predictive Checks
 
 ## Posterior Predictive P-value ($\PPP$)
 
 * **Concept:** $\PPP$ is a goodness-of-fit measure comparing observed data ($\by^{\text{obs}}$) to replicated data ($\by^{\text{rep}}$) from the posterior predictive model. Good models generate replicates similar to the observed data.
-* **Discrepancy Statistic $T(\by, \btheta)$:** Summarizes specific data features (potentially depending on parameters $\btheta$). $\PPP$ is the probability that the replicated discrepancy exceeds the observed one:
-  $$ \PPP = P(T(\by^{\text{rep}}, \btheta) > T(\by^{\text{obs}}, \btheta) \mid \by^{\text{obs}}) $$
+* **Discrepancy Statistic $D(\by, \btheta)$:** Summarizes specific data features (potentially depending on parameters $\btheta$). $\PPP$ is the probability that the replicated discrepancy exceeds the observed one:
+  $$ \PPP = P(D(\by^{\text{rep}}, \btheta) > D(\by^{\text{obs}}, \btheta) \mid \by^{\text{obs}}) $$
 * **A Key Simplification (Meng, 1994):** If the discrepancy is a well-calibrated $p$-value, $\mathcal{P}(\by, \btheta)$, its replicate is exactly $\mathrm{Unif}(0,1)$. By the law of iterated expectations, $\PPP$ simplifies to the posterior average of observed $p$-values:
   $$ \PPP = \E(\pv(\by^{\text{obs}}, \btheta) \mid \by^{\text{obs}}) $$
 
 ## Computing Procedures of PPP
 
 1. **Sample from Posterior:**
-Begin with a set of posterior samples $\{\btheta_{s}\}_{s=1}^S$.
+Begin with a set of posterior samples $\{\btheta_{t}\}_{t=1}^T$.
+
+2. **Compute Discrepancy Statistics:** For each sample $t$, compute two statistics:
+* **Replicated Statistic (optional):**  $D^{\text{rep}}_{t}$ calculated with $\boldsymbol{y}_{t}^{\text{rep}} \sim p(\boldsymbol{y} \mid \btheta_{t})$
+* **Observed Statistic:** $D^\text{obs}_{t}$ calculated with the actual data $\boldsymbol{y}^\text{obs}$
 
 
-2. **Compute Discrepancy Statistics:** For each sample $s$, compute two statistics:
+3. **Aggregate & Compare:** 
+Collect all $T$ results and calculate the proportion of draws where the replicated statistic is greater than or equal to the observed statistic; alternatively, calculate the posterior mean of $p$-values:
 
-   * **Replicated Statistic (optional):**  $T^{\text{rep}}_{s}$ calculated with $\boldsymbol{y}_{s}^{\text{rep}} \sim p(\boldsymbol{y} \mid \btheta_{s})$
-   * **Observed Statistic:** $T^\text{obs}_{s}$ calculated with the actual data $\boldsymbol{y}^\text{obs}$
-
-
-3. **Aggregate & Compare:**
-Collect all $S$ results and calculate the proportion of draws where the replicated statistic is greater than or equal to the observed statistic; alternatively, calculate the posterior mean of $p$-values:
-
-
-$$\widehat{\PPP} = \frac{1}{S} \sum_{s=1}^{S} I(T_{s}^{\text{rep}} \ge T_{s}^\text{obs}), \text{or, }
-\widehat{\PPP}= \frac{1}{S}\sum_{s=1}^{S} \pv(\by^{\text{obs}},\btheta^{(s)}) 
+$$
+\widehat{\PPP} = \frac{1}{T} \sum_{t=1}^{T} I(D_{t}^{\text{rep}} \ge D_{t}^\text{obs}), \text{ or, } \widehat{\PPP}= \frac{1}{T}\sum_{t=1}^{T} \pv(\by^{\text{obs}},\btheta^{(t)})
 $$
 
 ## Limitations of PPC and HPC
 
 1. **Arbitrary Discrepancy Measures:**
-   The selection of the test statistic, $T(\by, \btheta)$, is inherently arbitray, lacking guidelines from data fitting results.
+   The selection of the test statistic, $D(\by, \btheta)$, is inherently arbitray, lacking guidelines from data fitting results.
 
 2. **Masking of Structural Flaws:**
    Relying on simple, marginal statistics (e.g., mean, median, or standardized deviations as used in $\chi^2$ statistic) can yield a "passing" score while hiding critical deficiencies like misspecified covariate functional forms.
@@ -190,86 +109,291 @@ $$
   * Under the true model, 
    $$z_i^{\text{RSP}}(y_i \mid \boldsymbol{\theta})  \sim N(0,1)$$
 
-## Illustration with Animation
+## Illustration of Z-residuals: Under Correct Models
 
-## Accounting for Uncertainty: Posterior Z-residuals
+<video src="slidesplot/z_residual_anim-correct.mp4" height="900" style="display: block; margin: 0 auto;" controls loop muted></video>
 
-* In Bayesian contexts, $\boldsymbol{\theta}$ is unknown. We average the pointwise RSP over the posterior distribution $\pi(\boldsymbol{\theta} \mid \mathbf{y})$.
-* **Posterior RSP:**
+## Illustration of Z-residuals: Under Wrong Models
+
+<video src="slidesplot/z_residual_anim-wrong.mp4" height="900" style="display: block; margin: 0 auto;" controls loop muted></video>
+
+
+## Posterior Z-residuals 
+
+* For a fitted Bayesian model, we can average the pointwise RSP over the posterior distribution $\pi(\boldsymbol{\theta} \mid \mathbf{y})$, resuting in   **Posterior RSP:**
   $$ \widehat{\text{RSP}}_i^{\text{post}}(y_i) = \frac{1}{T} \sum_{t=1}^T \text{RSP}_i(y_i \mid \boldsymbol{\theta}^{(t)}) $$
 * **Posterior Z-residual:**
   $$ z_i^{\text{post}}(y_i) = -\Phi^{-1}\left(\widehat{\text{RSP}}_i^{\text{post}}(y_i)\right) $$
 
 
  
-## Mitigating Double-use: ISCV Z-residuals
+## ISCV Z-residuals for Mitigating Data Double-use
 
 * Posterior Z-residuals use $\mathbf{y}$ twice. To mitigate finite-sample bias, we approximate Leave-One-Out (LOO) cross-validation via Importance Sampling (ISCV).
-* **ISCV RSP:** Weighted average using inverse-likelihood weights $w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) = 1 / f_i(y_i \mid \boldsymbol{\theta}^{(t)})$.
+* **Importance weight**: 
+Reweigh each MCMC sample $\btheta^{(t)}$ for each $y_i$ differently with the inverse-likelihood 
+$$w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) = {1 \over f_i(y_i \mid \boldsymbol{\theta}^{(t)})}$$
+* **ISCV RSP:**
   $$ \widehat{\text{RSP}}_i^{\text{ISCV}}(y_i) = \frac{\sum_{t=1}^T \left[ \text{RSP}_i(y_i \mid \boldsymbol{\theta}^{(t)}) w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) \right]}{\sum_{t=1}^T w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)})} $$
 * **ISCV Z-residual:**
   $$ z_i^{\text{ISCV}}(y_i) = -\Phi^{-1}\left(\widehat{\text{RSP}}_i^{\text{ISCV}}(y_i)\right) $$
 
-
-
 ## A Paradigm Shift
 
-| Feature | Posterior Predictive Checks (PPC) | Z-residuals Diagnostics |
-| :- | :------- | :------- |
-| **Workflow** | **Test-first, then-summarize** | **Summarize-first, then-test** |
-| **Mechanics** | Compute stat $T$ for every MCMC draw, average $p$-values. | Average probabilities over MCMC draws, compute *single* set of $Z$. |
-| **Calibration** | Poor (conservative bias scaling with $p$). | Asymptotically uniform/normal. |
-| **Power** | Low | High (full sample size used). |
-| **Versatility** | Limited structural targeted checks. | Enables AOV, SW, heteroskedasticity tests analogous to OLS. |
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 
-## Computing Procedures {.smaller}
+library(gt)
+library(tibble)
 
-**PPC with Parameter-wise Z-residuals**
+# 1. Create the data frame
+tibble(
+  Feature = c("**Workflow**", "**Calibration**", "**Power**", "**Versatility**"),
+  
+  PPC = c("**Test-first, then-summarize**<br><br>Simulate statistic $T$ or computing a test $p$-value for every MCMC draw, then average $p$-values.",
+          "Conservative bias scaling with $p$.",
+          "Low if using marginal checks or HPC.",
+          "Requires extra guidance for choosing discrepancy statistics."),
+  
+  Z_res = c("**Summarize-first, then-test**<br><br>Average predictive density of $f(y_i\\vert{}\\bm{\\theta}^{(t)})$ over MCMC draws, compute *single* set of $Z$.",
+          "Asymptotically uniform/normal.",
+          "High (full sample size used).",
+          "Enables a wide range of diagnostic tests and tools for OLS: normality/nonlinearity/heteroskedasticity tests.")
+) |> 
+  
+  # 2. Build and format the gt table
+  gt() |> 
+  cols_label(
+    Feature = "Feature",
+    PPC = "PPC/HPC",
+    Z_res = "Z-residuals Diagnostics"
+  ) |> 
+  
+  # Render the Markdown and KaTeX math safely
+  fmt_markdown(columns = everything()) |> 
+  
+  # Lock in your exact column widths 
+  cols_width(
+    Feature ~ pct(15),
+    PPC ~ pct(35),
+    Z_res ~ pct(50)
+  ) |> 
+  
+  # Ensure standard left-alignment
+  cols_align(align = "left", columns = everything()) |> 
+  
+  # Make it stretch to the slide edges and scale the font size
+  tab_options(
+    table.width = pct(100),
+    table.font.size = "0.95em",
+    table.background.color = "transparent" ) |>
+  # Force vertical alignment to the top for all body cells
+  tab_style(
+    style = cell_text(v_align = "top"),
+    locations = cells_body()     
+  ) |>
+  # Force column labels to be bold
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
 
-|  | $y_1$ | $y_2$ | $\cdots$ | $y_n$ |  |  |
-| --- | --- | --- | --- | --- | --- | --- |
+```
+
+## Computing Procedures: PPC/HPC 
+
+::: {style="font-size: 33px;"}
+
+|     | $y_1$ | $y_2$ | $\cdots$ | $y_n$ |       |     | 
+| --- | ------- | ------- | ---     | -------     | --- | --- |
 | $\btheta^{(1)}$ | $z_1^{\rsp}(y_1 \mid \btheta^{(1)})$ | $z_2^{\rsp}(y_2 \mid \btheta^{(1)})$ | $\cdots$ | $z_n^{\rsp}(y_n \mid \btheta^{(1)})$ | $\xrightarrow{\text{Test}}$ | $p_1\sobs$ |
 | $\btheta^{(2)}$ | $z_1^{\rsp}(y_1 \mid \btheta^{(2)})$ | $z_2^{\rsp}(y_2 \mid \btheta^{(2)})$ | $\cdots$ | $z_n^{\rsp}(y_n \mid \btheta^{(2)})$ | $\xrightarrow{\text{Test}}$ | $p_2\sobs$ |
 | $\vdots$ | $\vdots$ | $\vdots$ | $\ddots$ | $\vdots$ |  | $\vdots$ |
 | $\btheta^{(T)}$ | $z_1^{\rsp}(y_1 \mid \btheta^{(T)})$ | $z_2^{\rsp}(y_2 \mid \btheta^{(T)})$ | $\cdots$ | $z_n^{\rsp}(y_n \mid \btheta^{(T)})$ | $\xrightarrow{\text{Test}}$ | $p_T\sobs$ |
-|  |  |  |  |  |  | $\downarrow$ |
-|  |  |  |  |  |  | **PPP** |
+|  |  |  |  |  |  | $\Big\downarrow \text{Mean}$ <br> **PPP** |
 
-**Z-Residual Diagnostics**
+:::
+
+## Computing Procedures: Z-Residual Diagnostics
+
+::: {style="font-size: 33px;"}
 
 |  | $y_1$ | $y_2$ | $\cdots$ | $y_n$ |  |  |
-| --- | --- | --- | --- | --- | --- | --- |
+| --- | ------- | ------- | ---     | -------     | -- | --- |
 | $\btheta^{(1)}$ | $\rsp_1(y_1 \mid \btheta^{(1)})$ | $\rsp_2(y_2 \mid \btheta^{(1)})$ | $\cdots$ | $\rsp_n(y_n \mid \btheta^{(1)})$ |  |  |
 | $\btheta^{(2)}$ | $\rsp_1(y_1 \mid \btheta^{(2)})$ | $\rsp_2(y_2 \mid \btheta^{(2)})$ | $\cdots$ | $\rsp_n(y_n \mid \btheta^{(2)})$ |  |  |
 | $\vdots$ | $\vdots$ | $\vdots$ | $\ddots$ | $\vdots$ |  |  |
 | $\btheta^{(T)}$ | $\rsp_1(y_1 \mid \btheta^{(T)})$ | $\rsp_2(y_2 \mid \btheta^{(T)})$ | $\cdots$ | $\rsp_n(y_n \mid \btheta^{(T)})$ |  |  |
 |  | $\downarrow$ | $\downarrow$ |  | $\downarrow$ |  |  |
-| $z_i^{\rsp}$ | $z^{\rsp}_1(y_1)$ | $z^{\rsp}_2(y_2)$ | $\cdots$ | $z^{\rsp}_n(y_n)$ | $\xrightarrow{\text{Test}}$ | $Z^{\rsp}$ $p$-value |
+| $z_i^{\rsp}$ | $z^{\rsp}_1(y_1)$ | $z^{\rsp}_2(y_2)$ | $\cdots$ | $z^{\rsp}_n(y_n)$ | $\xrightarrow{\text{Test}}$ | $Z^{\rsp}$ <br>$p$-value |
+:::
 
-## Asymptotic Properties of Posterior and ISCV Z-residuals {.smaller}
 
-**Theorem 1** (Total variation convergence of the LOO predictive distribution, informal statement).
-*Let $Y_1,\dots,Y_{n+1}$ be independent with true densities $f_i^{(*)}$, and suppose the model $\{f_i(\cdot\mid\theta):\theta\in\Theta\}$ with prior $\Pi$ is well-specified, so that the true parameter set $W_0=\{\theta\in\Theta: f_i(\cdot\mid\theta)=f_i^{(*)} \text{ for all } i\}$ is non-empty. Assume standard regularity conditions ensuring posterior consistency and predictive continuity (specifically, conditions (i)--(v) of supplementary §S-supp:proofs). Under these conditions, the LOO predictive distribution $P_i^{(n),\mathrm{CV}}$ converges to the true distribution $P_i^{(*)}$ in total variation, in probability: for each fixed $i$,*
+## Asymptotic Properties of Posterior or CV Z-residuals
 
-$$\big\Vert{}P_i^{(n),\mathrm{CV}}-P_i^{(*)}\big\Vert{}_{\mathrm{TV}} \xrightarrow{P} 0 \quad \text{as } n\to\infty.$$
+::: {style="font-size: 0.9em;"}
 
-Because each observation's RSP is computed from a predictive distribution that converges to the truth, the RSPs themselves inherit the correct limiting behavior, not only marginally but also jointly across observations:
 
-**Theorem 2** (Asymptotic independence of cross-validated RSPs).
-*Under the assumptions of Theorem S-thm:loo-pred-tv-formal-w0, for any fixed pair of distinct indices $i \neq j$, the cross-validated RSPs converge jointly in distribution to a pair of independent standard uniform random variables: as $n\to\infty$,*
+* **Theorem 1** (Convergence of the LOO Predictive Distribution).
+  *Suppose the model is correctly specified and satisfies standard regularity conditions (ensuring posterior consistency and predictive continuity). As the sample size $n \to \infty$, the Leave-One-Out (CV) predictive distribution, $P_i^{(n),\mathrm{CV}}$, converges to the true data-generating distribution, $P_i^{(*)}$, in total variation distance, in probability:*
 
-$$\big(\mathrm{RSP}_i^{(n),\mathrm{CV}},\, \mathrm{RSP}_j^{(n),\mathrm{CV}}\big) \ \Rightarrow\ \big(\mathrm{Uniform}(0,1),\,\mathrm{Uniform}(0,1)\big),$$
+  $$ \big\Vert P_i^{(n),\mathrm{CV}} - P_i^{(*)} \big\Vert_{\mathrm{TV}} \xrightarrow{P} 0 $$
 
-*where the two limiting uniform variables are independent.*
+  *Because the predictive distributions lock onto the true data-generating process, the resulting RSPs inherit the correct limiting behavior—not just individually, but jointly across observations:*
 
-## Summarizing Replicated Test $p$-values
+* **Theorem 2** (Asymptotic Independence of CV RSPs).
+  *Under the same regularity conditions, for any pair of distinct observations $i \neq j$, their cross-validated RSPs converge jointly in distribution to independent standard uniform variables as $n \to \infty$:*
+
+  $$ \big(\mathrm{RSP}_i^{(n),\mathrm{CV}},\, \mathrm{RSP}_j^{(n),\mathrm{CV}}\big) \ \Rightarrow\ \big(\mathrm{Uniform}(0,1),\,\mathrm{Uniform}(0,1)\big) $$
+* The theorems can be extended to posterior Z-residuals as the posterior predictive and CV predictive distributions of $y_i$ are asymptotically equivalent.
+
+:::
+
+## Model Diagnostics with Z-residuals
+
+* Z-residuals behave like classical regression residuals — no fixed test, so many graphical/numerical tools apply.
+* **Marginal Checking:** QQ plot + Shapiro-Wilk test. ($\chi^2$ test not recommended — too sensitive to posterior variance shrinkage/inflation.)
+* **Targeted Covariate Checks:** residual-vs-covariate plots should be structureless.
+  * **Discrete:** AOV (mean) + Bartlett (variance) across categories.
+  * **Continuous:** bin into $k$ intervals, then apply the same tests.
+
+* **No Rigid Order:** a synthesis, not a checklist — mean-structure errors can cascade into marginal QQ/SW failures.
+* **Multiple Comparisons:** not a primary concern — the goal is *non-significant* $p$-values, so false positives are low-cost. **Exception**: mining many unused covariates or a large test battery needs FDR/e-value/data-splitting correction.
+
+## Illustration: Constructing the Z-AOV Test
+
+```{r}
+#| include: false
+#| eval: false
+# Two synthetic Z-residual-vs-covariate scatterplots illustrating the Z-AOV
+# test: left panel is homogeneous noise N(0,1); right panel has a log-shaped
+# mean trend and linearly increasing variance in X. Combined 1x2 via
+# patchwork, sharing the same X range and Y limits for a fair comparison.
+library(ggplot2)
+library(patchwork)
+
+set.seed(42)
+n <- 300
+breaks <- seq(0, 3, by = 0.5)
+
+x1 <- runif(n, 0, 3)
+y1 <- rnorm(n, mean = 0, sd = 1)
+df1 <- data.frame(X = x1, Z = y1)
+
+x2 <- runif(n, 0, 3)
+y2 <- rnorm(n, mean = log(3*x2 + 0.1)-x2, sd = 0.3 + 0.1 * x2)
+df2 <- data.frame(X = x2, Z = y2)
+
+ylims <- range(c(df1$Z, df2$Z))
+
+theme_z <- theme_bw(base_size = 18) +
+  theme(panel.grid = element_blank(),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        panel.background = element_rect(fill = "transparent", color = NA))
+
+p1 <- ggplot(df1, aes(X, Z)) +
+  geom_vline(xintercept = breaks, linewidth = 0.4) +
+  geom_point(shape = 1, size = 2.2) +
+  coord_cartesian(ylim = ylims) +
+  labs(x = "X", y = "Z-residual") +
+  theme_z
+
+p2 <- ggplot(df2, aes(X, Z)) +
+  geom_vline(xintercept = breaks, linewidth = 0.4) +
+  geom_point(shape = 1, size = 2.2) +
+  coord_cartesian(ylim = ylims) +
+  labs(x = "X", y = "Z-residual") +
+  theme_z
+
+# `&` (not `+`) applies theme_z to the whole patchwork composition, not just
+# each subplot -- otherwise patchwork's own outer canvas stays opaque white
+# even when each individual panel's background is transparent.
+combined <- (p1 + p2) & theme_z
+ggsave("slidesplot/z_aov_illustration.png", combined, width = 12, height = 5,
+       dpi = 150, bg = "transparent", device = ragg::agg_png)
+```
+
+![](slidesplot/z_aov_illustration.png)
+
+* Divide Z-residuals by a covariate (or linear predictor) into equally spaced intervals, then test the equality of the grouped means with an ANOVA $F$-test.
+* **Left:** homogeneous groups (no trend) — the null case.
+* **Right:** a clear group-mean trend, which the Z-AOV test is designed to detect.
+
+
+
+## Summarizing Replicated Test $p$-values for Discrete Models
+
+::: {style="font-size: 1em;"}
 
 * For discrete data, auxiliary randomization $\mathbf{U}$ means test $p$-values vary across random seeds.
-* **Solution:** Redraw $\mathbf{U}$ $J$ times, yielding replicated $p$-values $\{p_j(\mathbf{y})\}_{j=1}^J$.
-* We derive a distribution-free upper-bound for the order statistic (e.g., median):
-  $$ P\{p_{(r)}(\mathbf{y}) \le t\} \le H_{J,r} \cdot t $$
-* The value of $H_{J,r}$ can be computed using numerical optimization. For the median ($r=\lceil J/2\rceil$), $H_{100,50}\approx 1.65$, and $H_{500,250}\approx 1.80$. 
-* Yields a single, super-uniform $p$-value summary without requiring nested MCMC simulations.
+* **Solution:** Replicate $J$ sets of Z-residuals, and calculate a $p$-value for each set of Z-residuals, yielding replicated $p$-values $\{p_j(\mathbf{y})\}_{j=1}^J$, then summarize these $p$-values.
+
+```{r}
+#| echo: false
+#| fig-width: 14
+#| fig-height: 5
+#| fig-align: center
+#| dev.args: {bg: "transparent"}
+
+set.seed(2024)
+J <- 200
+H <- 1.72  # H_{200,100}, from the table on the next slide
+
+p_good <- rbeta(J, 5, 10)
+p_bad  <- rbeta(J, 1, 50)
+
+ub_good <- min(1, H * median(p_good))
+ub_bad  <- min(1, H * median(p_bad))
+
+par(mfrow = c(1, 2), oma = c(4, 0, 0, 0), mar = c(4, 4, 3, 1), bg = NA)
+
+hist(p_good, breaks = 20, col = "cyan4", border = "white", xlim = c(0, 1),
+     xlab = "replicated p-value", main = sprintf(
+       "Well-fitting model\nmedian ub p-value = %.3f", ub_good))
+abline(v = ub_good, col = "red", lwd = 2)
+abline(v = 0.05, col = "blue", lty = 2, lwd = 2)
+
+hist(p_bad, breaks = 20, col = "cyan4", border = "white", xlim = c(0, 1),
+     xlab = "replicated p-value", main = sprintf(
+       "Poorly-fitting model\nmedian ub p-value = %.3f", ub_bad))
+abline(v = ub_bad, col = "red", lwd = 2)
+abline(v = 0.05, col = "blue", lty = 2, lwd = 2)
+
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "")
+legend("bottom", legend = c("Upper-bound p-value", "0.05 threshold"),
+       col = c("red", "blue"), lty = c(1, 2), lwd = 2, horiz = TRUE,
+       bty = "n", xpd = NA)
+```
+
+:::
+
+## A Distribution-free Upper-Bound $p$-value for Order Statistics of Replicated $p$-values
+
+::: {style="font-size: 0.85em;"}
+
+* **Theorem 3** (Distribution-free Upper-bound for Order Statistics of Replicated $p$-values).
+  
+  Let $\pv(\by,\bU)\in[0,1]$ be a $p$-value computed from data $\by$ and auxiliary randomness $\bU$. Let $p_j(\by)=\pv(\by,\bU^{(j)})$ and let $p_{(r)}(\by)$ be their $r$-th order statistic. Define
+  $H_{J,r} := \sup_{p\in(0,1]} P\{\mathrm{Binom}(J,p)\ge r\}/{p}.$ Then, for any threshold $t\in[0,1]$, $P\{p_{(r)}(\bY) \le t\} \le H_{J,r} \cdot t$
+
+* **Upper-bound $p$-value:**  
+$$
+\pv_{(r)}^{\mathrm{ub}}(\by) := \min\{1,\, H_{J,r}\cdot p_{(r)}(\by)\}
+$$ 
+
+
+* The calibration constant $H_{J,r}$ can be computed using numerical optimization. Representative values for the median ($r=\lceil J/2 \rceil$):
+
+  | $J$ | 50 | 100 | 200 | 500 | 800 | 1000 | 1500 | 2000 |
+  |---|---|---|---|---|---|---|---|---|
+  | $H_{J,r}$ | 1.57 | 1.65 | 1.72 | 1.80 | 1.83 | 1.85 | 1.87 | 1.88 |
+
+* This upper-bound is better than 2, which can be derived using Markov Inequality.
+
+:::
 
 
 
@@ -299,78 +423,173 @@ for (pdf in pdf_files) {
 
 ## Simulation 1: Inverse Gaussian (IG) Regression
 
-* **Setup:** Continuous data. $n \in \{50, 100, 200\}$. No auxiliary randomization needed.
-* **DGP:** True model has a piecewise quadratic effect for covariate $X_1$.
-* **Fitted Models:**
-  1. **Correct:** Piecewise IG model.
-  2. **Misspecified:** Linear IG model (misses the nonlinear effect of $X_1$).
-* **Goal:** Evaluate capability to detect specific functional-form misspecifications.
+::: {style="font-size: 1em;"}
+
+* **Setup:** Continuous data, $n \in \{50, 100, 200\}$, 500 replicated datasets. No auxiliary randomization needed.
+* **Piecewise Quadratic Effect on $X_1$** (knot $c = 7.95$):
+  $$ B^{(i)} = (X_1^{(i)} - c)^2 I(X_1^{(i)} < c), \qquad A^{(i)} = (X_1^{(i)} - c)^2 I(X_1^{(i)} \ge c) $$
+* **Data-Generating Model:**
+  $$ Y_i \sim \mathrm{IG}(\mu_i, 25), \qquad \log(\mu_i) = -0.80 + 0.012B^{(i)} + 0.006A^{(i)} + \cdots $$
+* **Fitted Models** (via `brms`):
+  1. **Correct:** piecewise model with $B^{(i)}$ and $A^{(i)}$.
+  2. **Misspecified:** linear model, replacing $B^{(i)}, A^{(i)}$ with a simple linear effect of $X_1^{(i)}$.
+* **Goal:** Evaluate the ability of Z-residual diagnostics to detect this functional-form misspecification.
+
+:::
 
 
-## Visual Diagnostics (IG, $n=50$)
+```{r}
+#| include: false
+#| eval: false
+# Crop the 1x4 panel figure (plot/piecewise_ig_fig_n50.png) into a 2x2 grid:
+# left half (a,b) stacked above right half (c,d), then trim the outer
+# whitespace border. Output committed as plot/piecewise_ig_fig_n50_2x2.png.
+library(magick)
 
-![](plot/piecewise_ig_fig_n50.png){fig-align="center"}
+img <- image_read("plot/piecewise_ig_fig_n50.png")
 
-* **Correct Model (a)(b)**: No trend against $X_1$ or fitted values.
-* **Misspecified Model (c)(d):** Clear nonlinear pattern against $X_1$ (c), but masked when plotted against the overall linear predictor (d). *Covariate-specific plots are essential.*
+top    <- image_crop(img, "1575x750+0+0")
+bottom <- image_crop(img, "1575x750+1575+0")
+
+combined <- image_append(c(top, bottom), stack = TRUE)
+combined <- image_trim(combined)
+
+image_write(combined, path = "plot/piecewise_ig_fig_n50_2x2.png")
+```
+
+## Scatterplots (IG, $n=50$) 
+
+:::: {.columns style="display: flex; column-gap: 0; align-items: center;"}
+
+::: {.column style="flex: 0 0 63%;"}
+![](plot/piecewise_ig_fig_n50_2x2.png)
+:::
+
+::: {.column style="font-size: 1em;"}
+* **Correct Model (Top)**: No trend against $X_1$ or fitted values.
+* **Misspecified Model (Bottom):** Clear nonlinear pattern against $X_1$ (c), but masked when plotted against the overall linear predictor (d). *Covariate-specific plots are essential for this example.*
+* Marginal checking with SW tests fail to identify the non-linearity. 
+:::
+
+::::
 
 
+## Empirical $p$-value Distributions (IG, $n=50$)
 
-## Empirical $p$-value Distributions (IG)
+:::: {.columns style="display: flex; align-items: center;"}
 
-![](plot/piecewise_combined_histograms_n50.png){fig-align="center"}
+::: {.column style="width: 70%; flex: 0 0 70%;"}
+![](plot/piecewise_combined_histograms_n50.png){style="width: 100%; max-height: none;"}
+:::
 
-* **Blue = Correct Model, Red = Misspecified Model.**
-* Z-residual AOV tests (e, f) are uniform under correct model, strongly concentrated near zero under wrong model. SW/$\chi^2$ lack power.
+::: {.column style="width: 30%; flex: 0 0 30%; font-size: 0.7em; padding-left: 0px;"}
+* **Blue** = Correct Model, **Red** = Misspecified Model.
+* **SW (a, b):** near-uniform under *both* models — marginal normality isn't distorted by this localized misspecification, so SW lacks power.
+* **Z-AOV vs $X_1$ (e, f):** near-uniform under the correct model, strongly concentrated near zero under the wrong one — the clearest, best-calibrated signal.
+* **$\chi^2$ (i, j):** poorly calibrated even under the correct model (peaks near 0.8/0.5) — deflated Type-I error, little sensitivity.
+* **PPC/HPC (c, d, k, l):** mound-shaped around 0.5 or skewed toward small $p$-values under *both* models — little power to separate them.
+:::
+
+::::
 
 
 
 ## Rejection Rates & Power (IG)
 
-![](plot/piecewise_rejection_rate_plot.png){width=100%}
+![](plot/piecewise_rejection_rate_plot.png)
 
-* Z-AOV (b) maintains nominal $\alpha=0.05$ (black) and achieves rapidly increasing power (red) as $n$ grows.
-* Traditional SW (a) and $\chi^2$ (c) fail to detect localized mean misspecification.
+::: {style="font-size: 0.75em;"}
+
+* **Setup:** **Black** = Correct model (target error $\alpha=0.05$). **Red** = Misspecified model (detection should rise with $n$).
+* **Z-AOV (b) — Best Performer:** Achieves both exact calibration (stays near 0.05) and high power (reaches 100% rejection by $n=200$). Consistently outperforms both PPC and HPC.
+* **SW (a) — Low Power:** Fails to detect the wrong model (max 13% rejection) because this specific misspecification does not distort overall normality.
+* **$\chi^2$ (c) — Poorly Calibrated:** Rejection rates stay near zero for *both* models, rendering the standard cutoffs completely invalid.
+:::
 
 
 
 ## Simulation 2: Hurdle Negative Binomial (HNB)
 
-* **Setup:** Discrete count data with excess zeros ($\approx 30\%$). $n \in \{50, 100, 200\}$. Requires auxiliary randomization $U$.
-* **DGP:** True model has a logarithmic effect $\log(X_1)$ in the count component.
-* **Fitted Models:**
-  1. **Correct:** Logarithmic HNB.
-  2. **Misspecified:** Linear HNB.
-* **Goal:** Detect nonlinear mean misspecification in zero-inflated count data.
+* **Setup:** Discrete zero-inflated counts ($\pi^0 \approx 30\%$), $n \in \{50, 100, 200\}$, 500 replicated datasets. Requires auxiliary randomization $\bU$.
+* **Data-Generating Model** (count mean $\mu_i$, hurdle zero-probability $\hu$):
+  $$ \log(\mu_i) = -1 + 6\log(X_1^{(i)}) + X_2^{(i)}, \qquad \mathrm{logit}(\hu) = -1 - X_1^{(i)} - 5X_2^{(i)} $$
+* **Fitted Models** (via `brms`, both with the correct zero-model and all other covariates):
+  1. **Correct:** logarithmic effect $\log(X_1^{(i)})$ in the count component.
+  2. **Misspecified:** linear effect of $X_1^{(i)}$ replacing $\log(X_1^{(i)})$.
+* **Goal:** Evaluate detection of nonlinear mean misspecification in zero-inflated count data.
 
 
 
-## Visual Diagnostics (HNB, $n=50$)
+## Scatterplot (HNB, $n=50$)
 
-![](plot/sim2_HNB_scatter_box_plot.png){width=80%}
+```{r}
+#| include: false
+#| eval: false
+# Crop the 1x4 panel figure (plot/sim2_HNB_scatter_box_plot.png) into a 2x2
+# grid: each panel (a,b,c,d) is cropped and trimmed individually (to remove
+# the excess margin baked into the original 1x4 layout), padded with a
+# small consistent border, then reassembled as (a,b) over (c,d). Output
+# committed as plot/sim2_HNB_scatter_box_plot_2x2.png.
+library(magick)
 
-* **Top (Correct):** Residuals scattered, boxplots homogeneous across $X_1$ bins.
-* **Bottom (Misspecified):** Pronounced grouped mean differences across $X_1$. Detected by AOV grouped test.
+img <- image_read("plot/sim2_HNB_scatter_box_plot.png")
 
+pad <- "15x15"
+a <- image_border(image_trim(image_crop(img, "975x900+0+0")),    "none", pad)
+b <- image_border(image_trim(image_crop(img, "975x900+975+0")),  "none", pad)
+c <- image_border(image_trim(image_crop(img, "975x900+1950+0")), "none", pad)
+d <- image_border(image_trim(image_crop(img, "975x900+2925+0")), "none", pad)
 
+row1 <- image_append(c(a, b))
+row2 <- image_append(c(c, d))
+combined <- image_append(c(row1, row2), stack = TRUE)
+combined <- image_transparent(combined, color = "white", fuzz = 3)
+image_write(combined, path = "plot/sim2_HNB_scatter_box_plot_2x2.png")
+```
 
-## Empirical $p$-value Distributions (HNB)
+:::: {.columns style="display: flex; column-gap: 0; align-items: center;"}
 
-![](plot/sim2_hnb_combined_histograms_n50.png){width=70%}
+::: {.column width="65%"}
+![](plot/sim2_HNB_scatter_box_plot_2x2.png){height="800px" style="margin:0;"}
+:::
 
-* AOV tests (e, f) based on posterior/ISCV Z-residuals remain well calibrated (blue) and highly powerful (red). PPC and HPC methods cluster near $0.5$ under the null.
+::: {.column width="35%"}
+* **Top (Correct):** residuals scattered, boxplots homogeneous across $X_1$ bins.
+* **Bottom (Misspecified):** pronounced grouped mean differences across $X_1$, detected by AOV grouped test.
+:::
 
+::::
 
+## Empirical $p$-value Distributions (HNB, $n=50$)
+
+:::: {.columns style="display: flex; column-gap: 0; align-items: center;"}
+
+::: {.column width="90%"}
+![](plot/sim2_hnb_combined_histograms_n50.png)
+:::
+
+::: {.column width="10%" style="font-size: 0.7em;"}
+* **Blue** = Correct (Logarithmic), **Red** = Misspecified (Linear).
+* **SW (a, b):** approximately calibrated under the correct model, but separates the two models more weakly than the AOV tests.
+* **Z-AOV vs $X_1$ (e, f):** well calibrated under the correct model, highly powerful under the wrong one — $p$-values concentrate heavily near zero.
+* **PPC/HPC SW (c, d):** cluster around 0.5, little separation. **PPC AOV (g):** high power, but null $p$-values are biased toward 0.5 rather than uniform. **HPC AOV (h):** only weak separation.
+* **$\chi^2$ (i–l):** less targeted to this functional-form error; doesn't distinguish the models as clearly as the Z-AOV tests.
+:::
+
+::::
 
 ## Rejection Rates & Power (HNB)
 
-![](plot/sim2_hurdle_nl_rejection_rate_plot.png){width=100%}
+![](plot/sim2_hurdle_nl_rejection_rate_plot.png){fig-align="center" width="100%"}
 
-* Z-AOV maintains low Type-I error rates (black) and achieves nearly $100\%$ power for $n \ge 100$ (red). PPC AOV performs well but lags at smaller sample sizes.
+::: {style="font-size: 0.75em;"}
+* **Setup:** **Black** = Correct model (target error $\alpha \approx 0.05$). **Red** = Misspecified model (detection should rise with $n$).
+* **Z-AOV (b) — Strongest Signal:** Maintains valid calibration and reaches nearly 100% power by $n \ge 100$, clearly outperforming both PPC and HPC at smaller sample sizes.
+* **SW (a) — Valid & Sensitive:** Z-residual tests maintain nominal Type-I error while successfully detecting the misspecification. Corresponding PPC and HPC checks fail to separate the models.
+* **$\chi^2$ (c) — Less Informative:** Z-residuals show some power but lag far behind AOV, while standard PPC/HPC checks remain weak and unstable.
+:::
 
-
-
-#  Real-World Application
+#  A Real-World Application
 
 
 
@@ -385,73 +604,278 @@ for (pdf in pdf_files) {
 
 
 
-## Overall Goodness-of-Fit (Linear Models)
+## Marginal Checks for Linear Models
 
-![](plot/realdata_qqplot.png){width=100%}
+:::: {.columns style="display: flex; align-items: center;"}
 
-* **Result:** HNB (a) and NB (b) show adequate overall fit (adhering to diagonal, SW $p \ge 0.05$). Poisson models (c, d) fail dramatically due to unmodeled overdispersion.
+::: {.column style="width: 60; flex: 0 0 60%;"}
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: center
+#| out-width: "100%"
 
+library(magick)
+
+# 1. Read the original 1x4 image
+img <- image_read("plot/realdata_qqplot.png")
+info <- image_info(img)
+
+# 2. Calculate the exact width of a single pane
+w <- floor(info$width / 4)
+h <- info$height
+
+# 3. Slice the image into 4 individual panes using geometry_area(width, height, x_offset, y_offset)
+p1 <- image_crop(img, geometry_area(w, h, 0, 0))
+p2 <- image_crop(img, geometry_area(w, h, w, 0))
+p3 <- image_crop(img, geometry_area(w, h, w * 2, 0))
+p4 <- image_crop(img, geometry_area(w, h, w * 3, 0))
+
+# 4. Stitch them back together into a 2x2 grid
+row1 <- image_append(c(p1, p2))
+row2 <- image_append(c(p3, p4))
+image_append(c(row1, row2), stack = TRUE)
+
+```
+
+:::
+
+::: {.column style="width: 40%; flex: 0 0 40%; padding-left: 20px; font-size: 0.9em;"}
+
+* HNB (a) and NB (b) appear to be good models, giving normally distributed Z-residuals(adhering to diagonal, SW $p \ge 0.05$).
+* **Failure:** Poisson models (c, d) fail dramatically due to unmodeled overdispersion, resulting in many Z-residuals greater than 2.
+:::
+
+::::
 
 
 ## Detecting Nonlinearity in Depth
 
-![](plot/realdata_plot_linear.png){width=70%}
+:::: {.columns style="display: flex; align-items: center;"}
 
-* Plotting linear HNB Z-residuals against `depth` reveals a clear **U-shape** (a) and heterogeneous grouped boxplots (b).
-* AOV test confirms severe non-linearity (median upper-bound $p$-value = $0.012$).
+::: {.column style="width: 65%; flex: 0 0 65%;"}
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: center
+#| out-width: "100%"
+
+library(magick)
+
+# 1. Read the original 1x4 image
+img <- image_read("plot/realdata_plot_linear.png")
+info <- image_info(img)
+
+# 2. Calculate the exact width of a single pane
+w <- floor(info$width / 4)
+h <- info$height
+
+# 3. Slice the image into 4 individual panes
+p1 <- image_crop(img, geometry_area(w, h, 0, 0))
+p2 <- image_crop(img, geometry_area(w, h, w, 0))
+p3 <- image_crop(img, geometry_area(w, h, w * 2, 0))
+p4 <- image_crop(img, geometry_area(w, h, w * 3, 0))
+
+# 4. Stitch them back together into a 2x2 grid
+row1 <- image_append(c(p1, p2))
+row2 <- image_append(c(p3, p4))
+image_append(c(row1, row2), stack = TRUE)
+```
+:::
+
+::: {.column style="width: 35%; flex: 0 0 35%; padding-right: 20px; font-size: 0.9em;"}
+* **Visual Pattern:** Plotting linear HNB Z-residuals against `depth` reveals a clear **U-shape** (a) and heterogeneous grouped boxplots (b).
+* **Statistical Confirmation:** AOV test confirms severe non-linearity with a median upper-bound $p$-value of $0.012$.
+:::
+
+::::
+
+## Modeling Nonlinearity in Depth
+
+* **The Problem:** The previous linear model revealed a clear turning point at $\texttt{depth} \approx 7.95$.
+* **The Solution:** We replaced the linear term with a piecewise quadratic effect to capture this structural shift, creating two new variables:
+  * $\texttt{below7.95} = \{(\texttt{depth}-7.95)^2\}\,\mathbf{1}(\texttt{depth}<7.95)$
+  * $\texttt{above7.95} = \{(\texttt{depth}-7.95)^2\}\,\mathbf{1}(\texttt{depth}\ge 7.95)$
+* **Model Comparison:** Evaluated using LOO expected log point-wise predictive density (elpd), this nonlinear HNB model significantly improves the fit over the linear version and decisively outperforms standard NB models.
+
+## Resolving Nonlinearity: Diagnostic Results
+
+:::: {.columns style="display: flex; align-items: center;"}
+
+::: {.column style="width: 65%; flex: 0 0 65%;"}
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: center
+#| out-width: "100%"
+
+library(magick)
+
+# 1. Read the original 1x4 image (ensure a .png version is available)
+img <- image_read("plot/realdata_plot_nonlinear.png")
+info <- image_info(img)
+
+# 2. Calculate the exact width of a single pane
+w <- floor(info$width / 4)
+h <- info$height
+
+# 3. Slice the image into 4 individual panes
+p1 <- image_crop(img, geometry_area(w, h, 0, 0))
+p2 <- image_crop(img, geometry_area(w, h, w, 0))
+p3 <- image_crop(img, geometry_area(w, h, w * 2, 0))
+p4 <- image_crop(img, geometry_area(w, h, w * 3, 0))
+
+# 4. Stitch them back together into a 2x2 grid
+row1 <- image_append(c(p1, p2))
+row2 <- image_append(c(p3, p4))
+image_append(c(row1, row2), stack = TRUE)
+```
+:::
+
+::: {.column style="width: 35%; flex: 0 0 35%; padding-left: 20px; font-size: 0.9em;"}
+* **Visual Success:** Scatterplot (a) and boxplots (b) now display randomly scattered, homogeneous Z-residuals. The U-shape is entirely eliminated.
+* **Statistical Confirmation:** Tests confirm the improved fit; the $Z^{\text{Post-RSP}}\text{-AOV}$ test yields a median upper-bound $p$-value of $1.000$. 
+* **Replicated $p$-values:** Histograms (c, d) show $p$-values for both Z-SW and Z-AOV tests are now mostly above $0.05$, confirming the nonlinear effect is successfully modeled.
+:::
+
+::::
+
+
+## Diagnostic $p$-values and LOO Comparisons
 
 
 
-## The Refined Nonlinear Model
-
-![](plot/realdata_plot_nonlinear.png){width=70%}
-
-* **Refinement:** Added piecewise quadratic effect for `depth` based on visual turning point at 7.95m.
-* **Result:** Patterns eliminated. Scatterplot and boxplots are homogeneous. AOV test $p$-value climbs to $1.00$.
-
+::: {.content-visible when-format="html"}
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 
 
-## Model Comparison
+library(gt)
+library(tibble)
 
-| Family | Model Type | Z-SW $p$ | Z-AOV $p$ | $\Delta_{\text{elpd}}$ (LOO) |
-| :--- | :--- | :--- | :--- | :--- |
-| **HNB** | **Nonlinear** | $1.000$ | $1.000$ | **$0.0$** |
-| HNB | Linear | $0.790$ | $0.012$ | $-19.9$ |
-| NB | Nonlinear | $0.337$ | $0.760$ | $-34.0$ |
-| NB | Linear | $0.299$ | $0.010$ | $-42.5$ |
-| HP | Linear | $<0.01$ | $0.020$ | $-118.6$ |
+# 1. Create the data frame (all as strings to preserve exact formatting)
+data <- tibble(
+  Type = c(rep("Linear models (Worse Models)", 4), rep("Nonlinear models (Better Models)", 2)),
+  Family = c("HNB", "NB", "HP", "Poisson", "HNB", "NB"),
+  
+  Post_SW = c("0.790", "0.299", "<0.01", "<0.01", "1.000", "0.337"),
+  Post_AOV = c("0.012", "0.010", "0.020", "0.012", "1.000", "0.760"),
+  Post_chi = c("0.823", "0.948", "<0.01", "<0.01", "0.732", "0.905"),
+  
+  ISCV_SW = c("0.395", "0.880", "<0.01", "<0.01", "0.534", "0.031"),
+  ISCV_AOV = c("0.013", "0.009", "0.022", "0.015", "1.000", "0.650"),
+  ISCV_chi = c("0.316", "0.520", "<0.01", "<0.01", "0.262", "0.372"),
+  
+  PPC_SW = c("0.674", "0.392", "<0.01", "<0.01", "0.616", "0.149"),
+  PPC_AOV = c("0.035", "0.026", "0.041", "0.013", "0.575", "0.372"),
+  PPC_ychi = c("0.017", "0.538", "<0.01", "<0.01", "0.024", "0.169"),
+  
+  HPC_SW = c("0.609", "0.530", "<0.01", "<0.01", "0.593", "0.478"),
+  HPC_AOV = c("0.369", "0.403", "0.324", "0.340", "0.518", "0.538"),
+  HPC_ychi = c("0.250", "0.691", "<0.01", "<0.01", "0.348", "0.755"),
+  
+  LOO_Delta = c("-19.9", "-42.5", "-118.6", "-803.3", "0.0", "-34.0"),
+  LOO_SE = c("6.8", "9.9", "34.4", "101.1", "0.0", "9.9"),
+  LOO_Pr = c("0.002", "<0.001", "<0.001", "<0.001", "Ref.", "<0.001")
+)
 
-* The **Nonlinear HNB** model satisfies all diagnostic checks and significantly outperforms all other models out-of-sample.
-* The nonlinear effect primarily acts on the *hurdle* component (zero-inflation probability increases away from 7.95m depth).
+# 2. Build the gt table
+data |> 
+  gt(groupname_col = "Type") |> 
+  
+  # Group the headers (Spanners)
+  tab_spanner(label = md("**Post. Z-Residual Tests**"), columns = c(Post_SW, Post_AOV, Post_chi)) |>
+  tab_spanner(label = md("**ISCV Z-Residual Tests**"), columns = c(ISCV_SW, ISCV_AOV, ISCV_chi)) |>
+  tab_spanner(label = md("**PPC Tests**"), columns = c(PPC_SW, PPC_AOV, PPC_ychi)) |>
+  tab_spanner(label = md("**HPC Tests**"), columns = c(HPC_SW, HPC_AOV, HPC_ychi)) |>
+  tab_spanner(label = md("**LOO Comparison**"), columns = c(LOO_Delta, LOO_SE, LOO_Pr)) |>
+  
+  # Set individual column labels (Double-escaping LaTeX backslashes!)
+  cols_label(
+    Family = "Family",
+    Post_SW = "Z-SW", Post_AOV = "Z-AOV", Post_chi = md("Z-$\\chi^2$"),
+    ISCV_SW = "Z-SW", ISCV_AOV = "Z-AOV", ISCV_chi = md("Z-$\\chi^2$"),
+    PPC_SW = "Z-SW", PPC_AOV = "Z-AOV", PPC_ychi = md("$y-\\chi^2$"),
+    HPC_SW = "Z-SW", HPC_AOV = "Z-AOV", HPC_ychi = md("$y-\\chi^2$"),
+    LOO_Delta = md("$\\Delta_{\\text{elpd}}$"), 
+    LOO_SE = "SE", 
+    LOO_Pr = md("$\\\\Pr( \\ge 0)$")
+  ) |> 
+  
+  # Process the markdown and KaTeX
+  fmt_markdown(columns = everything()) |>
+  
+  # Align numbers to the right, Family names to the left
+  cols_align(align = "right", columns = -Family) |>
+  cols_align(align = "left", columns = Family) |>
+  
+  # Make the table dense enough to fit 16 columns on a slide
+  tab_options(
+    table.width = pct(100),
+    table.font.size = "0.5em", 
+    
+    # Tighten vertical space
+    data_row.padding = px(2),
+    column_labels.padding = px(2),
+    row_group.padding = px(2),
+    
+    # Tighten horizontal (column) space
+    data_row.padding.horizontal = px(0),
+    column_labels.padding.horizontal = px(0),
+    row_group.padding.horizontal = px(0),
+    
+    table.background.color = "transparent"
+  ) |>
+  
+  # Bold the column labels and row group names for readability
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(
+      cells_column_labels(),
+      cells_row_groups()      # <-- Adds bolding to the group names
+    )
+  ) |>
+  
+  # Add the table caption as a header
+  tab_header(
+    title = md("**Table:** Diagnostic $p$-values and LOO comparisons for the dolphin-sighting data.")
+  )
+```
+:::
 
+::: {style="font-size: 0.8em"}
 
+* **Linear Model:** Marginal checks with SW tests lack power to detect the nonlinearity ($p \ge 0.609$) in HNB and NB models, whereas Z-AOV-based tests successfully reject the misspecified model.
+* **Nonlinear Model:** Adding piecewise quadratic terms improve the linear models. Both nonlinear HNB and NB models strongly pass all Z-residual tests (e.g., HNB Z-AOV $p = 1.000$).
+* **$\text{PPC}_{y-\chi^2}$ Discrepancy:** This specific test diverges from other tests, rejecting both HNB models ($p < 0.05$) while accepting the NB variants.
+* **LOO Model Comparison**: Out-of-sample prediction definitively ranks the nonlinear HNB first ($\Delta_{\text{elpd}}=0$), outperforming all linear, NB, and Poisson candidates. This confirms that our Z-residual diagnostics successfully guided us to the superior model.
+:::
 
 #  Conclusion & Future Directions
 
+## Conclusions
+
+::: {style="font-size: 1em"}
 
 
-## Summary of Contributions
+* **"Summarize-First, Then-Test":** Integrating RSPs over MCMC sample yields a *single* set of asymptotically $N(0,1)$ Z-residuals for standard graphical and statistical checks.
+* **Higher Power & Calibration:** Z-residual diagnostics outperforms traditional PPC and HPC in detecting misspecification while maintaining nominal Type-I error rates.
+* **Diagnosis beyond Marginal Checks:** Marginal tests (SW, $\chi^2$) may mask structural flaws; covariate-specific tests ($Z$-AOV) and visual summaries are essential.
+* **Reduced Conservatism:** Parameter-wise Z-residual PPCs effectively mitigate the "double-use-of-data" bias of traditional $\chi^2$-PPCs.
+* **Real-World Efficacy:** Successfully exposed an unmodeled nonlinear effect in the dolphin dataset, guiding a revision that improved out-of-sample prediction (LOO `elpd`).
+* **[Zresidual: An R Package](https://tiw150.github.io/Zresidual/index.html):** A unified, highly extensible framework for standard and cross-validated Z-residuals, supporting popular packages (``brms``, ``glm``, ``coxph``, ``survreg``, ``glmmTMB``) and custom user-supplied distributions.
 
-* **Methodological Shift:** Transitioned from "test-first, then summarize" (PPC) to "summarize-first, then test" (Z-residuals).
-* **Asymptotic Calibration:** Posterior and ISCV Z-residuals converge to standard normal, ensuring well-calibrated $p$-values.
-* **Diagnostic Versatility:** Enables targeted tests (AOV, SW) that uncover structural flaws (like functional form misspecification) which omnibus checks miss.
-* **Preserved Power:** Uses full sample size without holdout reductions.
-
-
+:::
 
 ## Limitations & Future Directions
 
-* **Limitations:**
-  * Strict observation-level focus: Insensitive to internal/latent structure misspecifications (hierarchical effects, priors).
-* **Future Work:**
-  * Extend framework to internal model components (synergizing with Uniform Parametrization Checks).
-  * Expand the suite of targeted Z-residual tests (e.g., spatial dependence, formal e-values for multiple testing correction).
-  * Improve computational efficiency for summarizing simulated $p$-values over auxiliary $\mathbf{U}$.
+* **Diagnosing Latent Structures:** The current framework focuses strictly on observation-level data, limiting its sensitivity to internal components like latent variables and priors. We plan to extend the "summarize-first" RSP framework to evaluate internal structures by integrating concepts from Uniform Parametrization Checks (UPC).
+* **Exact Calibration for Discrete Data:** To resolve the variation caused by auxiliary randomness ($\bm{U}$), we will explore simulation-based calibration using the posterior predictive distribution. This approach aims to yield an exactly calibrated single-number $p$-value without requiring computationally expensive MCMC reruns.
+* **Expanding the Diagnostic Toolkit:** Because no single test catches everything, we will develop a broader suite of targeted, highly sensitive and specific Z-residual tests to better pinpoint and separate different sources of model deficiency.
+* **E-value Adaptations:** We aim to adapt Z-residual diagnostics into e-statistics. Because E-values retain rigorous error-control guarantees when multiplied together, they offer a highly promising methodology for sequential and multiple Bayesian model criticism.
 
-
-
-## Questions?
-
-**Thank you.**
-
-*Paper: "Z-residuals: A Versatile Diagnostic Framework for Bayesian Models"*

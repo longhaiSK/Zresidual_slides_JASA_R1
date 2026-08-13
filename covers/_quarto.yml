@@ -1,6 +1,0 @@
-project:
-  type: default
-format: typst
-execute: 
-  cache: false
-  freeze: false

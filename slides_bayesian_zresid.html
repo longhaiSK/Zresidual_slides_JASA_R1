@@ -31,7 +31,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="slides_bayesian_zresid_files/libs/revealjs/dist/theme/quarto-33499b982d98f9cdd879323b3848dbf2.css">
+  <link rel="stylesheet" href="slides_bayesian_zresid_files/libs/revealjs/dist/theme/quarto-c9b3261e2631790583110999716b6d4e.css">
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
@@ -153,41 +153,16 @@
 </div>
 
 </section>
-<section id="outline" class="slide level2 unnumbered">
-<h2>Outline</h2>
-<ol type="1">
-<li><p><strong>Introduction &amp; Motivation</strong></p>
-<ul>
-<li>The Diagnostic Gap in Bayesian Modeling</li>
-<li>Limitations of Posterior Predictive Checks (PPC)</li>
-</ul></li>
-<li><p><strong>Methodology: The Z-residual Framework</strong></p>
-<ul>
-<li>Randomized Survival Probability (RSP)</li>
-<li>Posterior and ISCV Z-residuals</li>
-<li>Asymptotic Guarantees</li>
-</ul></li>
-<li><p><strong>Simulation Studies</strong></p>
-<ul>
-<li>Continuous Inverse Gaussian Regression</li>
-<li>Discrete Hurdle Negative Binomial Regression</li>
-</ul></li>
-<li><p><strong>Application to a Zero-inflated Dolphin-Sighting Dataset</strong></p></li>
-<li><p><strong>Conclusion &amp; Future Directions</strong></p></li>
-</ol>
+<section>
+<section id="introduction" class="title-slide slide level1 center" data-number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
 <div style="display: none;">
-<p>$$ % — Custom Commands for MathJax —</p>
+<p>$$ % — Custom Commands for MathJax/KaTeX, specific to slides_bayesian_zresid.qmd — % Injected via include-before-body (see slides_bayesian_zresid.qmd YAML header) % instead of living inline in the .qmd body, so it can’t confuse the % Markdown/outline parser (raw HTML blocks with embedded blank lines can).</p>
 <p>% Acronyms and Custom Text </p>
 <p>% Math Symbols (Bold) </p>
-<p>% General Superscripts and Subscripts <br>
-</p>
+<p>% General Superscripts and Subscripts </p>
 <p>% Compound Superscripts for Z-residuals $$</p>
 </div>
-</section>
-<section>
-<section id="introduction" class="title-slide slide level1 center">
-<h1>Introduction</h1>
-
 </section>
 <section id="where-we-stand-current-model-checking-methods" class="slide level2">
 <h2>Where We Stand: Current Model Checking Methods</h2>
@@ -217,37 +192,39 @@
 </ul>
 </section></section>
 <section>
-<section id="posterior-predictive-checks" class="title-slide slide level1 center">
-<h1>Posterior Predictive Checks</h1>
+<section id="posterior-and-holdout-predictive-checks" class="title-slide slide level1 center" data-number="2">
+<h1><span class="header-section-number">2</span> Posterior and Holdout Predictive Checks</h1>
 
 </section>
 <section id="posterior-predictive-p-value-textppp" class="slide level2">
 <h2>Posterior Predictive P-value (<span class="math inline">\text{PPP}</span>)</h2>
 <ul>
 <li><strong>Concept:</strong> <span class="math inline">\text{PPP}</span> is a goodness-of-fit measure comparing observed data (<span class="math inline">\boldsymbol{y}^{\text{obs}}</span>) to replicated data (<span class="math inline">\boldsymbol{y}^{\text{rep}}</span>) from the posterior predictive model. Good models generate replicates similar to the observed data.</li>
-<li><strong>Discrepancy Statistic <span class="math inline">T(\boldsymbol{y}, \boldsymbol{\theta})</span>:</strong> Summarizes specific data features (potentially depending on parameters <span class="math inline">\boldsymbol{\theta}</span>). <span class="math inline">\text{PPP}</span> is the probability that the replicated discrepancy exceeds the observed one: <span class="math display"> \text{PPP}= P(T(\boldsymbol{y}^{\text{rep}}, \boldsymbol{\theta}) &gt; T(\boldsymbol{y}^{\text{obs}}, \boldsymbol{\theta}) \mid \boldsymbol{y}^{\text{obs}}) </span></li>
+<li><strong>Discrepancy Statistic <span class="math inline">D(\boldsymbol{y}, \boldsymbol{\theta})</span>:</strong> Summarizes specific data features (potentially depending on parameters <span class="math inline">\boldsymbol{\theta}</span>). <span class="math inline">\text{PPP}</span> is the probability that the replicated discrepancy exceeds the observed one: <span class="math display"> \text{PPP}= P(D(\boldsymbol{y}^{\text{rep}}, \boldsymbol{\theta}) &gt; D(\boldsymbol{y}^{\text{obs}}, \boldsymbol{\theta}) \mid \boldsymbol{y}^{\text{obs}}) </span></li>
 <li><strong>A Key Simplification (Meng, 1994):</strong> If the discrepancy is a well-calibrated <span class="math inline">p</span>-value, <span class="math inline">\mathcal{P}(\boldsymbol{y}, \boldsymbol{\theta})</span>, its replicate is exactly <span class="math inline">\mathrm{Unif}(0,1)</span>. By the law of iterated expectations, <span class="math inline">\text{PPP}</span> simplifies to the posterior average of observed <span class="math inline">p</span>-values: <span class="math display"> \text{PPP}= \mathbb{E}(\mathcal{P}(\boldsymbol{y}^{\text{obs}}, \boldsymbol{\theta}) \mid \boldsymbol{y}^{\text{obs}}) </span></li>
 </ul>
 </section>
 <section id="computing-procedures-of-ppp" class="slide level2">
 <h2>Computing Procedures of PPP</h2>
 <ol type="1">
-<li><p><strong>Sample from Posterior:</strong> Begin with a set of posterior samples <span class="math inline">\{\boldsymbol{\theta}_{s}\}_{s=1}^S</span>.</p></li>
-<li><p><strong>Compute Discrepancy Statistics:</strong> For each sample <span class="math inline">s</span>, compute two statistics:</p>
-<ul>
-<li><strong>Replicated Statistic (optional):</strong> <span class="math inline">T^{\text{rep}}_{s}</span> calculated with <span class="math inline">\boldsymbol{y}_{s}^{\text{rep}} \sim p(\boldsymbol{y} \mid \boldsymbol{\theta}_{s})</span></li>
-<li><strong>Observed Statistic:</strong> <span class="math inline">T^\text{obs}_{s}</span> calculated with the actual data <span class="math inline">\boldsymbol{y}^\text{obs}</span></li>
-</ul></li>
-<li><p><strong>Aggregate &amp; Compare:</strong> Collect all <span class="math inline">S</span> results and calculate the proportion of draws where the replicated statistic is greater than or equal to the observed statistic; alternatively, calculate the posterior mean of <span class="math inline">p</span>-values:</p></li>
+<li><p><strong>Sample from Posterior:</strong> Begin with a set of posterior samples <span class="math inline">\{\boldsymbol{\theta}_{t}\}_{t=1}^T</span>.</p></li>
+<li><p><strong>Compute Discrepancy Statistics:</strong> For each sample <span class="math inline">t</span>, compute two statistics:</p></li>
 </ol>
-<p><span class="math display">\widehat{\text{PPP}} = \frac{1}{S} \sum_{s=1}^{S} I(T_{s}^{\text{rep}} \ge T_{s}^\text{obs}), \text{or, }
-\widehat{\text{PPP}}= \frac{1}{S}\sum_{s=1}^{S} \mathcal{P}(\boldsymbol{y}^{\text{obs}},\boldsymbol{\theta}^{(s)})
+<ul>
+<li><strong>Replicated Statistic (optional):</strong> <span class="math inline">D^{\text{rep}}_{t}</span> calculated with <span class="math inline">\boldsymbol{y}_{t}^{\text{rep}} \sim p(\boldsymbol{y} \mid \boldsymbol{\theta}_{t})</span></li>
+<li><strong>Observed Statistic:</strong> <span class="math inline">D^\text{obs}_{t}</span> calculated with the actual data <span class="math inline">\boldsymbol{y}^\text{obs}</span></li>
+</ul>
+<ol start="3" type="1">
+<li><strong>Aggregate &amp; Compare:</strong> Collect all <span class="math inline">T</span> results and calculate the proportion of draws where the replicated statistic is greater than or equal to the observed statistic; alternatively, calculate the posterior mean of <span class="math inline">p</span>-values:</li>
+</ol>
+<p><span class="math display">
+\widehat{\text{PPP}} = \frac{1}{T} \sum_{t=1}^{T} I(D_{t}^{\text{rep}} \ge D_{t}^\text{obs}), \text{ or, } \widehat{\text{PPP}}= \frac{1}{T}\sum_{t=1}^{T} \mathcal{P}(\boldsymbol{y}^{\text{obs}},\boldsymbol{\theta}^{(t)})
 </span></p>
 </section>
 <section id="limitations-of-ppc-and-hpc" class="slide level2">
 <h2>Limitations of PPC and HPC</h2>
 <ol type="1">
-<li><p><strong>Arbitrary Discrepancy Measures:</strong> The selection of the test statistic, <span class="math inline">T(\boldsymbol{y}, \boldsymbol{\theta})</span>, is inherently arbitray, lacking guidelines from data fitting results.</p></li>
+<li><p><strong>Arbitrary Discrepancy Measures:</strong> The selection of the test statistic, <span class="math inline">D(\boldsymbol{y}, \boldsymbol{\theta})</span>, is inherently arbitray, lacking guidelines from data fitting results.</p></li>
 <li><p><strong>Masking of Structural Flaws:</strong> Relying on simple, marginal statistics (e.g., mean, median, or standardized deviations as used in <span class="math inline">\chi^2</span> statistic) can yield a “passing” score while hiding critical deficiencies like misspecified covariate functional forms.</p></li>
 <li><p><strong>The “Test-First, Then-Summarize” Paradigm:</strong> Computing dataset-level discrepancies for every MCMC draw evaluates the model against its exact training data, severely exacerbating double-use bias.</p></li>
 <li><p><strong>Poor Calibration &amp; Low Power:</strong> Due to double-use bias, PPC <span class="math inline">p</span>-values (especially <span class="math inline">\chi^2</span>) are rarely uniform under the null. They artificially cluster around <span class="math inline">0.5</span>, crippling the test’s power to detect true model misfit.</p></li>
@@ -255,8 +232,8 @@
 </ol>
 </section></section>
 <section>
-<section id="the-z-residual-framework" class="title-slide slide level1 center">
-<h1>The Z-residual Framework</h1>
+<section id="the-z-residual-framework" class="title-slide slide level1 center" data-number="3">
+<h1><span class="header-section-number">3</span> The Z-residual Framework</h1>
 
 </section>
 <section id="randomized-survival-probability-rsp" class="slide level2">
@@ -287,81 +264,539 @@
 </ul></li>
 </ul>
 </section>
-<section id="illustration-with-animation" class="slide level2">
-<h2>Illustration with Animation</h2>
+<section id="illustration-of-z-residuals-under-correct-models" class="slide level2">
+<h2>Illustration of Z-residuals: Under Correct Models</h2>
+<video src="slidesplot/z_residual_anim-correct.mp4" height="900" style="display: block; margin: 0 auto;" controls="" loop="" muted="">
+</video>
 </section>
-<section id="accounting-for-uncertainty-posterior-z-residuals" class="slide level2">
-<h2>Accounting for Uncertainty: Posterior Z-residuals</h2>
+<section id="illustration-of-z-residuals-under-wrong-models" class="slide level2">
+<h2>Illustration of Z-residuals: Under Wrong Models</h2>
+<video src="slidesplot/z_residual_anim-wrong.mp4" height="900" style="display: block; margin: 0 auto;" controls="" loop="" muted="">
+</video>
+</section>
+<section id="posterior-z-residuals" class="slide level2">
+<h2>Posterior Z-residuals</h2>
 <ul>
-<li>In Bayesian contexts, <span class="math inline">\boldsymbol{\theta}</span> is unknown. We average the pointwise RSP over the posterior distribution <span class="math inline">\pi(\boldsymbol{\theta} \mid \mathbf{y})</span>.</li>
-<li><strong>Posterior RSP:</strong> <span class="math display"> \widehat{\text{RSP}}_i^{\text{post}}(y_i) = \frac{1}{T} \sum_{t=1}^T \text{RSP}_i(y_i \mid \boldsymbol{\theta}^{(t)}) </span></li>
+<li>For a fitted Bayesian model, we can average the pointwise RSP over the posterior distribution <span class="math inline">\pi(\boldsymbol{\theta} \mid \mathbf{y})</span>, resuting in <strong>Posterior RSP:</strong> <span class="math display"> \widehat{\text{RSP}}_i^{\text{post}}(y_i) = \frac{1}{T} \sum_{t=1}^T \text{RSP}_i(y_i \mid \boldsymbol{\theta}^{(t)}) </span></li>
 <li><strong>Posterior Z-residual:</strong> <span class="math display"> z_i^{\text{post}}(y_i) = -\Phi^{-1}\left(\widehat{\text{RSP}}_i^{\text{post}}(y_i)\right) </span></li>
 </ul>
 </section>
-<section id="mitigating-double-use-iscv-z-residuals" class="slide level2">
-<h2>Mitigating Double-use: ISCV Z-residuals</h2>
+<section id="iscv-z-residuals-for-mitigating-data-double-use" class="slide level2">
+<h2>ISCV Z-residuals for Mitigating Data Double-use</h2>
 <ul>
 <li>Posterior Z-residuals use <span class="math inline">\mathbf{y}</span> twice. To mitigate finite-sample bias, we approximate Leave-One-Out (LOO) cross-validation via Importance Sampling (ISCV).</li>
-<li><strong>ISCV RSP:</strong> Weighted average using inverse-likelihood weights <span class="math inline">w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) = 1 / f_i(y_i \mid \boldsymbol{\theta}^{(t)})</span>. <span class="math display"> \widehat{\text{RSP}}_i^{\text{ISCV}}(y_i) = \frac{\sum_{t=1}^T \left[ \text{RSP}_i(y_i \mid \boldsymbol{\theta}^{(t)}) w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) \right]}{\sum_{t=1}^T w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)})} </span></li>
+<li><strong>Importance weight</strong>: Reweigh each MCMC sample <span class="math inline">\boldsymbol{\theta}^{(t)}</span> for each <span class="math inline">y_i</span> differently with the inverse-likelihood <span class="math display">w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) = {1 \over f_i(y_i \mid \boldsymbol{\theta}^{(t)})}</span></li>
+<li><strong>ISCV RSP:</strong> <span class="math display"> \widehat{\text{RSP}}_i^{\text{ISCV}}(y_i) = \frac{\sum_{t=1}^T \left[ \text{RSP}_i(y_i \mid \boldsymbol{\theta}^{(t)}) w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)}) \right]}{\sum_{t=1}^T w_i^{\text{IS}}(\boldsymbol{\theta}^{(t)})} </span></li>
 <li><strong>ISCV Z-residual:</strong> <span class="math display"> z_i^{\text{ISCV}}(y_i) = -\Phi^{-1}\left(\widehat{\text{RSP}}_i^{\text{ISCV}}(y_i)\right) </span></li>
 </ul>
 </section>
 <section id="a-paradigm-shift" class="slide level2">
 <h2>A Paradigm Shift</h2>
-<table class="caption-top">
+<div class="cell">
+<div class="cell-output-display">
+<div id="cwhylcsqlo" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#cwhylcsqlo table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#cwhylcsqlo thead, #cwhylcsqlo tbody, #cwhylcsqlo tfoot, #cwhylcsqlo tr, #cwhylcsqlo td, #cwhylcsqlo th {
+  border-style: none;
+}
+
+#cwhylcsqlo p {
+  margin: 0;
+  padding: 0;
+}
+
+#cwhylcsqlo .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 0.95em;
+  font-weight: normal;
+  font-style: normal;
+  background-color: rgba(255, 255, 255, 0);
+  width: 100%;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#cwhylcsqlo .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: rgba(255, 255, 255, 0);
+  border-bottom-width: 0;
+}
+
+#cwhylcsqlo .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: rgba(255, 255, 255, 0);
+  border-top-width: 0;
+}
+
+#cwhylcsqlo .gt_heading {
+  background-color: rgba(255, 255, 255, 0);
+  text-align: center;
+  border-bottom-color: rgba(255, 255, 255, 0);
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_col_heading {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#cwhylcsqlo .gt_column_spanner_outer {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#cwhylcsqlo .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#cwhylcsqlo .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#cwhylcsqlo .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#cwhylcsqlo .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#cwhylcsqlo .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#cwhylcsqlo .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cwhylcsqlo .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#cwhylcsqlo .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#cwhylcsqlo .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#cwhylcsqlo .gt_stub {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cwhylcsqlo .gt_stub_row_group {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#cwhylcsqlo .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#cwhylcsqlo .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#cwhylcsqlo .gt_summary_row {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cwhylcsqlo .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#cwhylcsqlo .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_grand_summary_row {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cwhylcsqlo .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#cwhylcsqlo .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_footnotes {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cwhylcsqlo .gt_sourcenotes {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cwhylcsqlo .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cwhylcsqlo .gt_left {
+  text-align: left;
+}
+
+#cwhylcsqlo .gt_center {
+  text-align: center;
+}
+
+#cwhylcsqlo .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cwhylcsqlo .gt_font_normal {
+  font-weight: normal;
+}
+
+#cwhylcsqlo .gt_font_bold {
+  font-weight: bold;
+}
+
+#cwhylcsqlo .gt_font_italic {
+  font-style: italic;
+}
+
+#cwhylcsqlo .gt_super {
+  font-size: 65%;
+}
+
+#cwhylcsqlo .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#cwhylcsqlo .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#cwhylcsqlo .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#cwhylcsqlo .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#cwhylcsqlo .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#cwhylcsqlo .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#cwhylcsqlo .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#cwhylcsqlo .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#cwhylcsqlo div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top" style="table-layout:fixed;width:100%;" data-quarto-bootstrap="false">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 44%">
-<col style="width: 44%">
+<col style="width: 15%">
+<col style="width: 35%">
+<col style="width: 50%">
 </colgroup>
 <thead>
-<tr class="header">
-<th style="text-align: left;">Feature</th>
-<th style="text-align: left;">Posterior Predictive Checks (PPC)</th>
-<th style="text-align: left;">Z-residuals Diagnostics</th>
+<tr class="gt_col_headings header">
+<th id="Feature" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Feature</th>
+<th id="PPC" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">PPC/HPC</th>
+<th id="Z_res" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-residuals Diagnostics</th>
 </tr>
 </thead>
-<tbody>
+<tbody class="gt_table_body">
 <tr class="odd">
-<td style="text-align: left;"><strong>Workflow</strong></td>
-<td style="text-align: left;"><strong>Test-first, then-summarize</strong></td>
-<td style="text-align: left;"><strong>Summarize-first, then-test</strong></td>
+<td class="gt_row gt_left" headers="Feature" style="vertical-align: top"><strong>Workflow</strong></td>
+<td class="gt_row gt_left" headers="PPC" style="vertical-align: top"><strong>Test-first, then-summarize</strong><br><br>Simulate statistic <span class="math inline">T</span> or computing a test <span class="math inline">p</span>-value for every MCMC draw, then average <span class="math inline">p</span>-values.</td>
+<td class="gt_row gt_left" headers="Z_res" style="vertical-align: top"><strong>Summarize-first, then-test</strong><br><br>Average predictive density of <span class="math inline">f(y_i\vert{}\bm{\theta}^{(t)})</span> over MCMC draws, compute <em>single</em> set of <span class="math inline">Z</span>.</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><strong>Mechanics</strong></td>
-<td style="text-align: left;">Compute stat <span class="math inline">T</span> for every MCMC draw, average <span class="math inline">p</span>-values.</td>
-<td style="text-align: left;">Average probabilities over MCMC draws, compute <em>single</em> set of <span class="math inline">Z</span>.</td>
+<td class="gt_row gt_left" headers="Feature" style="vertical-align: top"><strong>Calibration</strong></td>
+<td class="gt_row gt_left" headers="PPC" style="vertical-align: top">Conservative bias scaling with <span class="math inline">p</span>.</td>
+<td class="gt_row gt_left" headers="Z_res" style="vertical-align: top">Asymptotically uniform/normal.</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><strong>Calibration</strong></td>
-<td style="text-align: left;">Poor (conservative bias scaling with <span class="math inline">p</span>).</td>
-<td style="text-align: left;">Asymptotically uniform/normal.</td>
+<td class="gt_row gt_left" headers="Feature" style="vertical-align: top"><strong>Power</strong></td>
+<td class="gt_row gt_left" headers="PPC" style="vertical-align: top">Low if using marginal checks or HPC.</td>
+<td class="gt_row gt_left" headers="Z_res" style="vertical-align: top">High (full sample size used).</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><strong>Power</strong></td>
-<td style="text-align: left;">Low</td>
-<td style="text-align: left;">High (full sample size used).</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><strong>Versatility</strong></td>
-<td style="text-align: left;">Limited structural targeted checks.</td>
-<td style="text-align: left;">Enables AOV, SW, heteroskedasticity tests analogous to OLS.</td>
+<td class="gt_row gt_left" headers="Feature" style="vertical-align: top"><strong>Versatility</strong></td>
+<td class="gt_row gt_left" headers="PPC" style="vertical-align: top">Requires extra guidance for choosing discrepancy statistics.</td>
+<td class="gt_row gt_left" headers="Z_res" style="vertical-align: top">Enables a wide range of diagnostic tests and tools for OLS: normality/nonlinearity/heteroskedasticity tests.</td>
 </tr>
 </tbody>
 </table>
+
+</div>
+</div>
+</div>
 </section>
-<section id="computing-procedures" class="slide level2 smaller">
-<h2>Computing Procedures</h2>
-<p><strong>PPC with Parameter-wise Z-residuals</strong></p>
-<table class="caption-top" style="width:100%;">
+<section id="computing-procedures-ppchpc" class="slide level2">
+<h2>Computing Procedures: PPC/HPC</h2>
+<div style="font-size: 33px;">
+<table class="caption-top">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 9%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -418,29 +853,24 @@
 <td></td>
 <td></td>
 <td></td>
-<td><span class="math inline">\downarrow</span></td>
-</tr>
-<tr class="even">
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td><strong>PPP</strong></td>
+<td><span class="math inline">\Big\downarrow \text{Mean}</span> <br> <strong>PPP</strong></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Z-Residual Diagnostics</strong></p>
-<table class="caption-top" style="width:100%;">
+</div>
+</section>
+<section id="computing-procedures-z-residual-diagnostics" class="slide level2">
+<h2>Computing Procedures: Z-Residual Diagnostics</h2>
+<div style="font-size: 33px;">
+<table class="caption-top">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 6%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -506,110 +936,225 @@
 <td><span class="math inline">\cdots</span></td>
 <td><span class="math inline">z^{\text{RSP}}_n(y_n)</span></td>
 <td><span class="math inline">\xrightarrow{\text{Test}}</span></td>
-<td><span class="math inline">Z^{\text{RSP}}</span> <span class="math inline">p</span>-value</td>
+<td><span class="math inline">Z^{\text{RSP}}</span> <br><span class="math inline">p</span>-value</td>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
-<section id="asymptotic-properties-of-posterior-and-iscv-z-residuals" class="slide level2 smaller">
-<h2>Asymptotic Properties of Posterior and ISCV Z-residuals</h2>
-<p><strong>Theorem 1</strong> (Total variation convergence of the LOO predictive distribution, informal statement). <em>Let <span class="math inline">Y_1,\dots,Y_{n+1}</span> be independent with true densities <span class="math inline">f_i^{(*)}</span>, and suppose the model <span class="math inline">\{f_i(\cdot\mid\theta):\theta\in\Theta\}</span> with prior <span class="math inline">\Pi</span> is well-specified, so that the true parameter set <span class="math inline">W_0=\{\theta\in\Theta: f_i(\cdot\mid\theta)=f_i^{(*)} \text{ for all } i\}</span> is non-empty. Assume standard regularity conditions ensuring posterior consistency and predictive continuity (specifically, conditions (i)–(v) of supplementary §S-supp:proofs). Under these conditions, the LOO predictive distribution <span class="math inline">P_i^{(n),\mathrm{CV}}</span> converges to the true distribution <span class="math inline">P_i^{(*)}</span> in total variation, in probability: for each fixed <span class="math inline">i</span>,</em></p>
-<p><span class="math display">\big\Vert{}P_i^{(n),\mathrm{CV}}-P_i^{(*)}\big\Vert{}_{\mathrm{TV}} \xrightarrow{P} 0 \quad \text{as } n\to\infty.</span></p>
-<p>Because each observation’s RSP is computed from a predictive distribution that converges to the truth, the RSPs themselves inherit the correct limiting behavior, not only marginally but also jointly across observations:</p>
-<p><strong>Theorem 2</strong> (Asymptotic independence of cross-validated RSPs). <em>Under the assumptions of Theorem S-thm:loo-pred-tv-formal-w0, for any fixed pair of distinct indices <span class="math inline">i \neq j</span>, the cross-validated RSPs converge jointly in distribution to a pair of independent standard uniform random variables: as <span class="math inline">n\to\infty</span>,</em></p>
-<p><span class="math display">\big(\mathrm{RSP}_i^{(n),\mathrm{CV}},\, \mathrm{RSP}_j^{(n),\mathrm{CV}}\big) \ \Rightarrow\ \big(\mathrm{Uniform}(0,1),\,\mathrm{Uniform}(0,1)\big),</span></p>
-<p><em>where the two limiting uniform variables are independent.</em></p>
+<section id="asymptotic-properties-of-posterior-or-cv-z-residuals" class="slide level2">
+<h2>Asymptotic Properties of Posterior or CV Z-residuals</h2>
+<div style="font-size: 0.9em;">
+<ul>
+<li><p><strong>Theorem 1</strong> (Convergence of the LOO Predictive Distribution). <em>Suppose the model is correctly specified and satisfies standard regularity conditions (ensuring posterior consistency and predictive continuity). As the sample size <span class="math inline">n \to \infty</span>, the Leave-One-Out (CV) predictive distribution, <span class="math inline">P_i^{(n),\mathrm{CV}}</span>, converges to the true data-generating distribution, <span class="math inline">P_i^{(*)}</span>, in total variation distance, in probability:</em></p>
+<p><span class="math display"> \big\Vert P_i^{(n),\mathrm{CV}} - P_i^{(*)} \big\Vert_{\mathrm{TV}} \xrightarrow{P} 0 </span></p>
+<p><em>Because the predictive distributions lock onto the true data-generating process, the resulting RSPs inherit the correct limiting behavior—not just individually, but jointly across observations:</em></p></li>
+<li><p><strong>Theorem 2</strong> (Asymptotic Independence of CV RSPs). <em>Under the same regularity conditions, for any pair of distinct observations <span class="math inline">i \neq j</span>, their cross-validated RSPs converge jointly in distribution to independent standard uniform variables as <span class="math inline">n \to \infty</span>:</em></p>
+<p><span class="math display"> \big(\mathrm{RSP}_i^{(n),\mathrm{CV}},\, \mathrm{RSP}_j^{(n),\mathrm{CV}}\big) \ \Rightarrow\ \big(\mathrm{Uniform}(0,1),\,\mathrm{Uniform}(0,1)\big) </span></p></li>
+<li><p>The theorems can be extended to posterior Z-residuals as the posterior predictive and CV predictive distributions of <span class="math inline">y_i</span> are asymptotically equivalent.</p></li>
+</ul>
+</div>
 </section>
-<section id="summarizing-replicated-test-p-values" class="slide level2">
-<h2>Summarizing Replicated Test <span class="math inline">p</span>-values</h2>
+<section id="model-diagnostics-with-z-residuals" class="slide level2">
+<h2>Model Diagnostics with Z-residuals</h2>
+<ul>
+<li>Z-residuals behave like classical regression residuals — no fixed test, so many graphical/numerical tools apply.</li>
+<li><strong>Marginal Checking:</strong> QQ plot + Shapiro-Wilk test. (<span class="math inline">\chi^2</span> test not recommended — too sensitive to posterior variance shrinkage/inflation.)</li>
+<li><strong>Targeted Covariate Checks:</strong> residual-vs-covariate plots should be structureless.
+<ul>
+<li><strong>Discrete:</strong> AOV (mean) + Bartlett (variance) across categories.</li>
+<li><strong>Continuous:</strong> bin into <span class="math inline">k</span> intervals, then apply the same tests.</li>
+</ul></li>
+<li><strong>No Rigid Order:</strong> a synthesis, not a checklist — mean-structure errors can cascade into marginal QQ/SW failures.</li>
+<li><strong>Multiple Comparisons:</strong> not a primary concern — the goal is <em>non-significant</em> <span class="math inline">p</span>-values, so false positives are low-cost. <strong>Exception</strong>: mining many unused covariates or a large test battery needs FDR/e-value/data-splitting correction.</li>
+</ul>
+</section>
+<section id="illustration-constructing-the-z-aov-test" class="slide level2">
+<h2>Illustration: Constructing the Z-AOV Test</h2>
+
+<img data-src="slidesplot/z_aov_illustration.png" class="r-stretch"><ul>
+<li>Divide Z-residuals by a covariate (or linear predictor) into equally spaced intervals, then test the equality of the grouped means with an ANOVA <span class="math inline">F</span>-test.</li>
+<li><strong>Left:</strong> homogeneous groups (no trend) — the null case.</li>
+<li><strong>Right:</strong> a clear group-mean trend, which the Z-AOV test is designed to detect.</li>
+</ul>
+</section>
+<section id="summarizing-replicated-test-p-values-for-discrete-models" class="slide level2">
+<h2>Summarizing Replicated Test <span class="math inline">p</span>-values for Discrete Models</h2>
+<div style="font-size: 1em;">
 <ul>
 <li>For discrete data, auxiliary randomization <span class="math inline">\mathbf{U}</span> means test <span class="math inline">p</span>-values vary across random seeds.</li>
-<li><strong>Solution:</strong> Redraw <span class="math inline">\mathbf{U}</span> <span class="math inline">J</span> times, yielding replicated <span class="math inline">p</span>-values <span class="math inline">\{p_j(\mathbf{y})\}_{j=1}^J</span>.</li>
-<li>We derive a distribution-free upper-bound for the order statistic (e.g., median): <span class="math display"> P\{p_{(r)}(\mathbf{y}) \le t\} \le H_{J,r} \cdot t </span></li>
-<li>The value of <span class="math inline">H_{J,r}</span> can be computed using numerical optimization. For the median (<span class="math inline">r=\lceil J/2\rceil</span>), <span class="math inline">H_{100,50}\approx 1.65</span>, and <span class="math inline">H_{500,250}\approx 1.80</span>.</li>
-<li>Yields a single, super-uniform <span class="math inline">p</span>-value summary without requiring nested MCMC simulations.</li>
+<li><strong>Solution:</strong> Replicate <span class="math inline">J</span> sets of Z-residuals, and calculate a <span class="math inline">p</span>-value for each set of Z-residuals, yielding replicated <span class="math inline">p</span>-values <span class="math inline">\{p_j(\mathbf{y})\}_{j=1}^J</span>, then summarize these <span class="math inline">p</span>-values.</li>
 </ul>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_bayesian_zresid_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="1344"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="a-distribution-free-upper-bound-p-value-for-order-statistics-of-replicated-p-values" class="slide level2">
+<h2>A Distribution-free Upper-Bound <span class="math inline">p</span>-value for Order Statistics of Replicated <span class="math inline">p</span>-values</h2>
+<div style="font-size: 0.85em;">
+<ul>
+<li><p><strong>Theorem 3</strong> (Distribution-free Upper-bound for Order Statistics of Replicated <span class="math inline">p</span>-values).</p>
+<p>Let <span class="math inline">\mathcal{P}(\boldsymbol{y},\boldsymbol{U})\in[0,1]</span> be a <span class="math inline">p</span>-value computed from data <span class="math inline">\boldsymbol{y}</span> and auxiliary randomness <span class="math inline">\boldsymbol{U}</span>. Let <span class="math inline">p_j(\boldsymbol{y})=\mathcal{P}(\boldsymbol{y},\boldsymbol{U}^{(j)})</span> and let <span class="math inline">p_{(r)}(\boldsymbol{y})</span> be their <span class="math inline">r</span>-th order statistic. Define <span class="math inline">H_{J,r} := \sup_{p\in(0,1]} P\{\mathrm{Binom}(J,p)\ge r\}/{p}.</span> Then, for any threshold <span class="math inline">t\in[0,1]</span>, <span class="math inline">P\{p_{(r)}(\boldsymbol{Y}) \le t\} \le H_{J,r} \cdot t</span></p></li>
+<li><p><strong>Upper-bound <span class="math inline">p</span>-value:</strong><br>
+<span class="math display">
+\mathcal{P}_{(r)}^{\mathrm{ub}}(\boldsymbol{y}) := \min\{1,\, H_{J,r}\cdot p_{(r)}(\boldsymbol{y})\}
+</span></p></li>
+<li><p>The calibration constant <span class="math inline">H_{J,r}</span> can be computed using numerical optimization. Representative values for the median (<span class="math inline">r=\lceil J/2 \rceil</span>):</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th><span class="math inline">J</span></th>
+<th>50</th>
+<th>100</th>
+<th>200</th>
+<th>500</th>
+<th>800</th>
+<th>1000</th>
+<th>1500</th>
+<th>2000</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">H_{J,r}</span></td>
+<td>1.57</td>
+<td>1.65</td>
+<td>1.72</td>
+<td>1.80</td>
+<td>1.83</td>
+<td>1.85</td>
+<td>1.87</td>
+<td>1.88</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>This upper-bound is better than 2, which can be derived using Markov Inequality.</p></li>
+</ul>
+</div>
 </section></section>
 <section>
-<section id="simulation-studies" class="title-slide slide level1 center">
-<h1>Simulation Studies</h1>
+<section id="simulation-studies" class="title-slide slide level1 center" data-number="4">
+<h1><span class="header-section-number">4</span> Simulation Studies</h1>
 
 </section>
 <section id="simulation-1-inverse-gaussian-ig-regression" class="slide level2">
 <h2>Simulation 1: Inverse Gaussian (IG) Regression</h2>
+<div style="font-size: 1em;">
 <ul>
-<li><strong>Setup:</strong> Continuous data. <span class="math inline">n \in \{50, 100, 200\}</span>. No auxiliary randomization needed.</li>
-<li><strong>DGP:</strong> True model has a piecewise quadratic effect for covariate <span class="math inline">X_1</span>.</li>
-<li><strong>Fitted Models:</strong>
+<li><strong>Setup:</strong> Continuous data, <span class="math inline">n \in \{50, 100, 200\}</span>, 500 replicated datasets. No auxiliary randomization needed.</li>
+<li><strong>Piecewise Quadratic Effect on <span class="math inline">X_1</span></strong> (knot <span class="math inline">c = 7.95</span>): <span class="math display"> B^{(i)} = (X_1^{(i)} - c)^2 I(X_1^{(i)} &lt; c), \qquad A^{(i)} = (X_1^{(i)} - c)^2 I(X_1^{(i)} \ge c) </span></li>
+<li><strong>Data-Generating Model:</strong> <span class="math display"> Y_i \sim \mathrm{IG}(\mu_i, 25), \qquad \log(\mu_i) = -0.80 + 0.012B^{(i)} + 0.006A^{(i)} + \cdots </span></li>
+<li><strong>Fitted Models</strong> (via <code>brms</code>):
 <ol type="1">
-<li><strong>Correct:</strong> Piecewise IG model.</li>
-<li><strong>Misspecified:</strong> Linear IG model (misses the nonlinear effect of <span class="math inline">X_1</span>).</li>
+<li><strong>Correct:</strong> piecewise model with <span class="math inline">B^{(i)}</span> and <span class="math inline">A^{(i)}</span>.</li>
+<li><strong>Misspecified:</strong> linear model, replacing <span class="math inline">B^{(i)}, A^{(i)}</span> with a simple linear effect of <span class="math inline">X_1^{(i)}</span>.</li>
 </ol></li>
-<li><strong>Goal:</strong> Evaluate capability to detect specific functional-form misspecifications.</li>
+<li><strong>Goal:</strong> Evaluate the ability of Z-residual diagnostics to detect this functional-form misspecification.</li>
 </ul>
+</div>
 </section>
-<section id="visual-diagnostics-ig-n50" class="slide level2">
-<h2>Visual Diagnostics (IG, <span class="math inline">n=50</span>)</h2>
-
-<img data-src="plot/piecewise_ig_fig_n50.png" class="quarto-figure quarto-figure-center r-stretch"><ul>
-<li><strong>Correct Model (a)(b)</strong>: No trend against <span class="math inline">X_1</span> or fitted values.</li>
-<li><strong>Misspecified Model (c)(d):</strong> Clear nonlinear pattern against <span class="math inline">X_1</span> (c), but masked when plotted against the overall linear predictor (d). <em>Covariate-specific plots are essential.</em></li>
+<section id="scatterplots-ig-n50" class="slide level2">
+<h2>Scatterplots (IG, <span class="math inline">n=50</span>)</h2>
+<div class="columns" style="display: flex; column-gap: 0; align-items: center;">
+<div class="column" style="flex: 0 0 63%;">
+<p><img data-src="plot/piecewise_ig_fig_n50_2x2.png"></p>
+</div><div class="column" style="font-size: 1em;">
+<ul>
+<li><strong>Correct Model (Top)</strong>: No trend against <span class="math inline">X_1</span> or fitted values.</li>
+<li><strong>Misspecified Model (Bottom):</strong> Clear nonlinear pattern against <span class="math inline">X_1</span> (c), but masked when plotted against the overall linear predictor (d). <em>Covariate-specific plots are essential for this example.</em></li>
+<li>Marginal checking with SW tests fail to identify the non-linearity.</li>
 </ul>
+</div></div>
 </section>
-<section id="empirical-p-value-distributions-ig" class="slide level2">
-<h2>Empirical <span class="math inline">p</span>-value Distributions (IG)</h2>
-
-<img data-src="plot/piecewise_combined_histograms_n50.png" class="quarto-figure quarto-figure-center r-stretch"><ul>
-<li><strong>Blue = Correct Model, Red = Misspecified Model.</strong></li>
-<li>Z-residual AOV tests (e, f) are uniform under correct model, strongly concentrated near zero under wrong model. SW/<span class="math inline">\chi^2</span> lack power.</li>
+<section id="empirical-p-value-distributions-ig-n50" class="slide level2">
+<h2>Empirical <span class="math inline">p</span>-value Distributions (IG, <span class="math inline">n=50</span>)</h2>
+<div class="columns" style="display: flex; align-items: center;">
+<div class="column" style="width: 70%; flex: 0 0 70%;">
+<p><img data-src="plot/piecewise_combined_histograms_n50.png" style="width: 100%; max-height: none;"></p>
+</div><div class="column" style="width: 30%; flex: 0 0 30%; font-size: 0.7em; padding-left: 0px;">
+<ul>
+<li><strong>Blue</strong> = Correct Model, <strong>Red</strong> = Misspecified Model.</li>
+<li><strong>SW (a, b):</strong> near-uniform under <em>both</em> models — marginal normality isn’t distorted by this localized misspecification, so SW lacks power.</li>
+<li><strong>Z-AOV vs <span class="math inline">X_1</span> (e, f):</strong> near-uniform under the correct model, strongly concentrated near zero under the wrong one — the clearest, best-calibrated signal.</li>
+<li><strong><span class="math inline">\chi^2</span> (i, j):</strong> poorly calibrated even under the correct model (peaks near 0.8/0.5) — deflated Type-I error, little sensitivity.</li>
+<li><strong>PPC/HPC (c, d, k, l):</strong> mound-shaped around 0.5 or skewed toward small <span class="math inline">p</span>-values under <em>both</em> models — little power to separate them.</li>
 </ul>
+</div></div>
 </section>
 <section id="rejection-rates-power-ig" class="slide level2">
 <h2>Rejection Rates &amp; Power (IG)</h2>
 
-<img data-src="plot/piecewise_rejection_rate_plot.png" style="width:100.0%" class="r-stretch"><ul>
-<li>Z-AOV (b) maintains nominal <span class="math inline">\alpha=0.05</span> (black) and achieves rapidly increasing power (red) as <span class="math inline">n</span> grows.</li>
-<li>Traditional SW (a) and <span class="math inline">\chi^2</span> (c) fail to detect localized mean misspecification.</li>
+<img data-src="plot/piecewise_rejection_rate_plot.png" class="r-stretch"><div style="font-size: 0.75em;">
+<ul>
+<li><strong>Setup:</strong> <strong>Black</strong> = Correct model (target error <span class="math inline">\alpha=0.05</span>). <strong>Red</strong> = Misspecified model (detection should rise with <span class="math inline">n</span>).</li>
+<li><strong>Z-AOV (b) — Best Performer:</strong> Achieves both exact calibration (stays near 0.05) and high power (reaches 100% rejection by <span class="math inline">n=200</span>). Consistently outperforms both PPC and HPC.</li>
+<li><strong>SW (a) — Low Power:</strong> Fails to detect the wrong model (max 13% rejection) because this specific misspecification does not distort overall normality.</li>
+<li><strong><span class="math inline">\chi^2</span> (c) — Poorly Calibrated:</strong> Rejection rates stay near zero for <em>both</em> models, rendering the standard cutoffs completely invalid.</li>
 </ul>
+</div>
 </section>
 <section id="simulation-2-hurdle-negative-binomial-hnb" class="slide level2">
 <h2>Simulation 2: Hurdle Negative Binomial (HNB)</h2>
 <ul>
-<li><strong>Setup:</strong> Discrete count data with excess zeros (<span class="math inline">\approx 30\%</span>). <span class="math inline">n \in \{50, 100, 200\}</span>. Requires auxiliary randomization <span class="math inline">U</span>.</li>
-<li><strong>DGP:</strong> True model has a logarithmic effect <span class="math inline">\log(X_1)</span> in the count component.</li>
-<li><strong>Fitted Models:</strong>
+<li><strong>Setup:</strong> Discrete zero-inflated counts (<span class="math inline">\pi^0 \approx 30\%</span>), <span class="math inline">n \in \{50, 100, 200\}</span>, 500 replicated datasets. Requires auxiliary randomization <span class="math inline">\boldsymbol{U}</span>.</li>
+<li><strong>Data-Generating Model</strong> (count mean <span class="math inline">\mu_i</span>, hurdle zero-probability <span class="math inline">\pi^o_{i}</span>): <span class="math display"> \log(\mu_i) = -1 + 6\log(X_1^{(i)}) + X_2^{(i)}, \qquad \mathrm{logit}(\pi^o_{i}) = -1 - X_1^{(i)} - 5X_2^{(i)} </span></li>
+<li><strong>Fitted Models</strong> (via <code>brms</code>, both with the correct zero-model and all other covariates):
 <ol type="1">
-<li><strong>Correct:</strong> Logarithmic HNB.</li>
-<li><strong>Misspecified:</strong> Linear HNB.</li>
+<li><strong>Correct:</strong> logarithmic effect <span class="math inline">\log(X_1^{(i)})</span> in the count component.</li>
+<li><strong>Misspecified:</strong> linear effect of <span class="math inline">X_1^{(i)}</span> replacing <span class="math inline">\log(X_1^{(i)})</span>.</li>
 </ol></li>
-<li><strong>Goal:</strong> Detect nonlinear mean misspecification in zero-inflated count data.</li>
+<li><strong>Goal:</strong> Evaluate detection of nonlinear mean misspecification in zero-inflated count data.</li>
 </ul>
 </section>
-<section id="visual-diagnostics-hnb-n50" class="slide level2">
-<h2>Visual Diagnostics (HNB, <span class="math inline">n=50</span>)</h2>
-
-<img data-src="plot/sim2_HNB_scatter_box_plot.png" style="width:80.0%" class="r-stretch"><ul>
-<li><strong>Top (Correct):</strong> Residuals scattered, boxplots homogeneous across <span class="math inline">X_1</span> bins.</li>
-<li><strong>Bottom (Misspecified):</strong> Pronounced grouped mean differences across <span class="math inline">X_1</span>. Detected by AOV grouped test.</li>
+<section id="scatterplot-hnb-n50" class="slide level2">
+<h2>Scatterplot (HNB, <span class="math inline">n=50</span>)</h2>
+<div class="columns" style="display: flex; column-gap: 0; align-items: center;">
+<div class="column" style="width:65%;">
+<p><img data-src="plot/sim2_HNB_scatter_box_plot_2x2.png" style="margin:0;" height="800"></p>
+</div><div class="column" style="width:35%;">
+<ul>
+<li><strong>Top (Correct):</strong> residuals scattered, boxplots homogeneous across <span class="math inline">X_1</span> bins.</li>
+<li><strong>Bottom (Misspecified):</strong> pronounced grouped mean differences across <span class="math inline">X_1</span>, detected by AOV grouped test.</li>
 </ul>
+</div></div>
 </section>
-<section id="empirical-p-value-distributions-hnb" class="slide level2">
-<h2>Empirical <span class="math inline">p</span>-value Distributions (HNB)</h2>
-
-<img data-src="plot/sim2_hnb_combined_histograms_n50.png" style="width:70.0%" class="r-stretch"><ul>
-<li>AOV tests (e, f) based on posterior/ISCV Z-residuals remain well calibrated (blue) and highly powerful (red). PPC and HPC methods cluster near <span class="math inline">0.5</span> under the null.</li>
+<section id="empirical-p-value-distributions-hnb-n50" class="slide level2">
+<h2>Empirical <span class="math inline">p</span>-value Distributions (HNB, <span class="math inline">n=50</span>)</h2>
+<div class="columns" style="display: flex; column-gap: 0; align-items: center;">
+<div class="column" style="width:90%;">
+<p><img data-src="plot/sim2_hnb_combined_histograms_n50.png"></p>
+</div><div class="column" style="font-size: 0.7em;">
+<ul>
+<li><strong>Blue</strong> = Correct (Logarithmic), <strong>Red</strong> = Misspecified (Linear).</li>
+<li><strong>SW (a, b):</strong> approximately calibrated under the correct model, but separates the two models more weakly than the AOV tests.</li>
+<li><strong>Z-AOV vs <span class="math inline">X_1</span> (e, f):</strong> well calibrated under the correct model, highly powerful under the wrong one — <span class="math inline">p</span>-values concentrate heavily near zero.</li>
+<li><strong>PPC/HPC SW (c, d):</strong> cluster around 0.5, little separation. <strong>PPC AOV (g):</strong> high power, but null <span class="math inline">p</span>-values are biased toward 0.5 rather than uniform. <strong>HPC AOV (h):</strong> only weak separation.</li>
+<li><strong><span class="math inline">\chi^2</span> (i–l):</strong> less targeted to this functional-form error; doesn’t distinguish the models as clearly as the Z-AOV tests.</li>
 </ul>
+</div></div>
 </section>
 <section id="rejection-rates-power-hnb" class="slide level2">
 <h2>Rejection Rates &amp; Power (HNB)</h2>
 
-<img data-src="plot/sim2_hurdle_nl_rejection_rate_plot.png" style="width:100.0%" class="r-stretch"><ul>
-<li>Z-AOV maintains low Type-I error rates (black) and achieves nearly <span class="math inline">100\%</span> power for <span class="math inline">n \ge 100</span> (red). PPC AOV performs well but lags at smaller sample sizes.</li>
+<img data-src="plot/sim2_hurdle_nl_rejection_rate_plot.png" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"><div style="font-size: 0.75em;">
+<ul>
+<li><strong>Setup:</strong> <strong>Black</strong> = Correct model (target error <span class="math inline">\alpha \approx 0.05</span>). <strong>Red</strong> = Misspecified model (detection should rise with <span class="math inline">n</span>).</li>
+<li><strong>Z-AOV (b) — Strongest Signal:</strong> Maintains valid calibration and reaches nearly 100% power by <span class="math inline">n \ge 100</span>, clearly outperforming both PPC and HPC at smaller sample sizes.</li>
+<li><strong>SW (a) — Valid &amp; Sensitive:</strong> Z-residual tests maintain nominal Type-I error while successfully detecting the misspecification. Corresponding PPC and HPC checks fail to separate the models.</li>
+<li><strong><span class="math inline">\chi^2</span> (c) — Less Informative:</strong> Z-residuals show some power but lag far behind AOV, while standard PPC/HPC checks remain weak and unstable.</li>
 </ul>
+</div>
 </section></section>
 <section>
-<section id="real-world-application" class="title-slide slide level1 center">
-<h1>Real-World Application</h1>
+<section id="a-real-world-application" class="title-slide slide level1 center" data-number="5">
+<h1><span class="header-section-number">5</span> A Real-World Application</h1>
 
 </section>
 <section id="dolphin-sighting-dataset" class="slide level2">
@@ -625,124 +1170,748 @@
 </ul></li>
 </ul>
 </section>
-<section id="overall-goodness-of-fit-linear-models" class="slide level2">
-<h2>Overall Goodness-of-Fit (Linear Models)</h2>
-
-<img data-src="plot/realdata_qqplot.png" style="width:100.0%" class="r-stretch"><ul>
-<li><strong>Result:</strong> HNB (a) and NB (b) show adequate overall fit (adhering to diagonal, SW <span class="math inline">p \ge 0.05</span>). Poisson models (c, d) fail dramatically due to unmodeled overdispersion.</li>
+<section id="marginal-checks-for-linear-models" class="slide level2">
+<h2>Marginal Checks for Linear Models</h2>
+<div class="columns" style="display: flex; align-items: center;">
+<div class="column" style="width: 60; flex: 0 0 60%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_bayesian_zresid_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width: 40%; flex: 0 0 40%; padding-left: 20px; font-size: 0.9em;">
+<ul>
+<li>HNB (a) and NB (b) appear to be good models, giving normally distributed Z-residuals(adhering to diagonal, SW <span class="math inline">p \ge 0.05</span>).</li>
+<li><strong>Failure:</strong> Poisson models (c, d) fail dramatically due to unmodeled overdispersion, resulting in many Z-residuals greater than 2.</li>
 </ul>
+</div></div>
 </section>
 <section id="detecting-nonlinearity-in-depth" class="slide level2">
 <h2>Detecting Nonlinearity in Depth</h2>
-
-<img data-src="plot/realdata_plot_linear.png" style="width:70.0%" class="r-stretch"><ul>
-<li>Plotting linear HNB Z-residuals against <code>depth</code> reveals a clear <strong>U-shape</strong> (a) and heterogeneous grouped boxplots (b).</li>
-<li>AOV test confirms severe non-linearity (median upper-bound <span class="math inline">p</span>-value = <span class="math inline">0.012</span>).</li>
+<div class="columns" style="display: flex; align-items: center;">
+<div class="column" style="width: 65%; flex: 0 0 65%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_bayesian_zresid_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width: 35%; flex: 0 0 35%; padding-right: 20px; font-size: 0.9em;">
+<ul>
+<li><strong>Visual Pattern:</strong> Plotting linear HNB Z-residuals against <code>depth</code> reveals a clear <strong>U-shape</strong> (a) and heterogeneous grouped boxplots (b).</li>
+<li><strong>Statistical Confirmation:</strong> AOV test confirms severe non-linearity with a median upper-bound <span class="math inline">p</span>-value of <span class="math inline">0.012</span>.</li>
+</ul>
+</div></div>
+</section>
+<section id="modeling-nonlinearity-in-depth" class="slide level2">
+<h2>Modeling Nonlinearity in Depth</h2>
+<ul>
+<li><strong>The Problem:</strong> The previous linear model revealed a clear turning point at <span class="math inline">\texttt{depth} \approx 7.95</span>.</li>
+<li><strong>The Solution:</strong> We replaced the linear term with a piecewise quadratic effect to capture this structural shift, creating two new variables:
+<ul>
+<li><span class="math inline">\texttt{below7.95} = \{(\texttt{depth}-7.95)^2\}\,\mathbf{1}(\texttt{depth}&lt;7.95)</span></li>
+<li><span class="math inline">\texttt{above7.95} = \{(\texttt{depth}-7.95)^2\}\,\mathbf{1}(\texttt{depth}\ge 7.95)</span></li>
+</ul></li>
+<li><strong>Model Comparison:</strong> Evaluated using LOO expected log point-wise predictive density (elpd), this nonlinear HNB model significantly improves the fit over the linear version and decisively outperforms standard NB models.</li>
 </ul>
 </section>
-<section id="the-refined-nonlinear-model" class="slide level2">
-<h2>The Refined Nonlinear Model</h2>
-
-<img data-src="plot/realdata_plot_nonlinear.png" style="width:70.0%" class="r-stretch"><ul>
-<li><strong>Refinement:</strong> Added piecewise quadratic effect for <code>depth</code> based on visual turning point at 7.95m.</li>
-<li><strong>Result:</strong> Patterns eliminated. Scatterplot and boxplots are homogeneous. AOV test <span class="math inline">p</span>-value climbs to <span class="math inline">1.00</span>.</li>
+<section id="resolving-nonlinearity-diagnostic-results" class="slide level2">
+<h2>Resolving Nonlinearity: Diagnostic Results</h2>
+<div class="columns" style="display: flex; align-items: center;">
+<div class="column" style="width: 65%; flex: 0 0 65%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_bayesian_zresid_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width: 35%; flex: 0 0 35%; padding-left: 20px; font-size: 0.9em;">
+<ul>
+<li><strong>Visual Success:</strong> Scatterplot (a) and boxplots (b) now display randomly scattered, homogeneous Z-residuals. The U-shape is entirely eliminated.</li>
+<li><strong>Statistical Confirmation:</strong> Tests confirm the improved fit; the <span class="math inline">Z^{\text{Post-RSP}}\text{-AOV}</span> test yields a median upper-bound <span class="math inline">p</span>-value of <span class="math inline">1.000</span>.</li>
+<li><strong>Replicated <span class="math inline">p</span>-values:</strong> Histograms (c, d) show <span class="math inline">p</span>-values for both Z-SW and Z-AOV tests are now mostly above <span class="math inline">0.05</span>, confirming the nonlinear effect is successfully modeled.</li>
 </ul>
+</div></div>
 </section>
-<section id="model-comparison" class="slide level2">
-<h2>Model Comparison</h2>
-<table class="caption-top">
+<section id="diagnostic-p-values-and-loo-comparisons" class="slide level2">
+<h2>Diagnostic <span class="math inline">p</span>-values and LOO Comparisons</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div id="rirnlphyqs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#rirnlphyqs table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#rirnlphyqs thead, #rirnlphyqs tbody, #rirnlphyqs tfoot, #rirnlphyqs tr, #rirnlphyqs td, #rirnlphyqs th {
+  border-style: none;
+}
+
+#rirnlphyqs p {
+  margin: 0;
+  padding: 0;
+}
+
+#rirnlphyqs .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 0.5em;
+  font-weight: normal;
+  font-style: normal;
+  background-color: rgba(255, 255, 255, 0);
+  width: 100%;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#rirnlphyqs .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: rgba(255, 255, 255, 0);
+  border-bottom-width: 0;
+}
+
+#rirnlphyqs .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: rgba(255, 255, 255, 0);
+  border-top-width: 0;
+}
+
+#rirnlphyqs .gt_heading {
+  background-color: rgba(255, 255, 255, 0);
+  text-align: center;
+  border-bottom-color: rgba(255, 255, 255, 0);
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_col_heading {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 2px;
+  padding-bottom: 3px;
+  padding-left: 0px;
+  padding-right: 0px;
+  overflow-x: hidden;
+}
+
+#rirnlphyqs .gt_column_spanner_outer {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#rirnlphyqs .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#rirnlphyqs .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#rirnlphyqs .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#rirnlphyqs .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#rirnlphyqs .gt_group_heading {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 0px;
+  padding-right: 0px;
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#rirnlphyqs .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#rirnlphyqs .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#rirnlphyqs .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#rirnlphyqs .gt_row {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#rirnlphyqs .gt_stub {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+#rirnlphyqs .gt_stub_row_group {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 0px;
+  padding-right: 0px;
+  vertical-align: top;
+}
+
+#rirnlphyqs .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#rirnlphyqs .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#rirnlphyqs .gt_summary_row {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rirnlphyqs .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#rirnlphyqs .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_grand_summary_row {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rirnlphyqs .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#rirnlphyqs .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_footnotes {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rirnlphyqs .gt_sourcenotes {
+  color: #333333;
+  background-color: rgba(255, 255, 255, 0);
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rirnlphyqs .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rirnlphyqs .gt_left {
+  text-align: left;
+}
+
+#rirnlphyqs .gt_center {
+  text-align: center;
+}
+
+#rirnlphyqs .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#rirnlphyqs .gt_font_normal {
+  font-weight: normal;
+}
+
+#rirnlphyqs .gt_font_bold {
+  font-weight: bold;
+}
+
+#rirnlphyqs .gt_font_italic {
+  font-style: italic;
+}
+
+#rirnlphyqs .gt_super {
+  font-size: 65%;
+}
+
+#rirnlphyqs .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#rirnlphyqs .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#rirnlphyqs .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#rirnlphyqs .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#rirnlphyqs .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#rirnlphyqs .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#rirnlphyqs .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#rirnlphyqs .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#rirnlphyqs div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top" data-quarto-bootstrap="false">
 <colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
 </colgroup>
 <thead>
-<tr class="header">
-<th style="text-align: left;">Family</th>
-<th style="text-align: left;">Model Type</th>
-<th style="text-align: left;">Z-SW <span class="math inline">p</span></th>
-<th style="text-align: left;">Z-AOV <span class="math inline">p</span></th>
-<th style="text-align: left;"><span class="math inline">\Delta_{\text{elpd}}</span> (LOO)</th>
+<tr class="gt_heading header">
+<td colspan="16" class="gt_heading gt_title gt_font_normal gt_bottom_border"><strong>Table:</strong> Diagnostic <span class="math inline">p</span>-values and LOO comparisons for the dolphin-sighting data.</td>
+</tr>
+<tr class="gt_col_headings gt_spanner_row even">
+<th rowspan="2" id="Family" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Family</th>
+<th colspan="3" id="**Post. Z-Residual Tests**" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
+<strong>Post. Z-Residual Tests</strong>
+</div></th>
+<th colspan="3" id="**ISCV Z-Residual Tests**" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
+<strong>ISCV Z-Residual Tests</strong>
+</div></th>
+<th colspan="3" id="**PPC Tests**" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
+<strong>PPC Tests</strong>
+</div></th>
+<th colspan="3" id="**HPC Tests**" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
+<strong>HPC Tests</strong>
+</div></th>
+<th colspan="3" id="**LOO Comparison**" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
+<strong>LOO Comparison</strong>
+</div></th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Post_SW" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-SW</th>
+<th id="Post_AOV" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-AOV</th>
+<th id="Post_chi" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-<span class="math inline">\chi^2</span></th>
+<th id="ISCV_SW" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-SW</th>
+<th id="ISCV_AOV" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-AOV</th>
+<th id="ISCV_chi" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-<span class="math inline">\chi^2</span></th>
+<th id="PPC_SW" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-SW</th>
+<th id="PPC_AOV" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-AOV</th>
+<th id="PPC_ychi" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col"><span class="math inline">y-\chi^2</span></th>
+<th id="HPC_SW" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-SW</th>
+<th id="HPC_AOV" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">Z-AOV</th>
+<th id="HPC_ychi" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col"><span class="math inline">y-\chi^2</span></th>
+<th id="LOO_Delta" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col"><span class="math inline">\Delta_{\text{elpd}}</span></th>
+<th id="LOO_SE" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col">SE</th>
+<th id="LOO_Pr" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" style="font-weight: bold" scope="col"><span class="math inline">\\Pr( \ge 0)</span></th>
 </tr>
 </thead>
-<tbody>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row odd">
+<th colspan="16" id="Linear models (Worse Models)" class="gt_group_heading" data-quarto-table-cell-role="th" style="font-weight: bold" scope="colgroup">Linear models (Worse Models)</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Linear models (Worse Models)  Family">HNB</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_SW">0.790</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_AOV">0.012</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_chi">0.823</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_SW">0.395</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_AOV">0.013</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_chi">0.316</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_SW">0.674</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_AOV">0.035</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_ychi">0.017</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_SW">0.609</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_AOV">0.369</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_ychi">0.250</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Delta">-19.9</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_SE">6.8</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Pr">0.002</td>
+</tr>
 <tr class="odd">
-<td style="text-align: left;"><strong>HNB</strong></td>
-<td style="text-align: left;"><strong>Nonlinear</strong></td>
-<td style="text-align: left;"><span class="math inline">1.000</span></td>
-<td style="text-align: left;"><span class="math inline">1.000</span></td>
-<td style="text-align: left;"><strong><span class="math inline">0.0</span></strong></td>
+<td class="gt_row gt_left" headers="Linear models (Worse Models)  Family">NB</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_SW">0.299</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_AOV">0.010</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_chi">0.948</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_SW">0.880</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_AOV">0.009</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_chi">0.520</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_SW">0.392</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_AOV">0.026</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_ychi">0.538</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_SW">0.530</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_AOV">0.403</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_ychi">0.691</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Delta">-42.5</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_SE">9.9</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Pr">&lt;0.001</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">HNB</td>
-<td style="text-align: left;">Linear</td>
-<td style="text-align: left;"><span class="math inline">0.790</span></td>
-<td style="text-align: left;"><span class="math inline">0.012</span></td>
-<td style="text-align: left;"><span class="math inline">-19.9</span></td>
+<td class="gt_row gt_left" headers="Linear models (Worse Models)  Family">HP</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_AOV">0.020</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_chi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_AOV">0.022</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_chi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_AOV">0.041</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_ychi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_AOV">0.324</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_ychi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Delta">-118.6</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_SE">34.4</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Pr">&lt;0.001</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">NB</td>
-<td style="text-align: left;">Nonlinear</td>
-<td style="text-align: left;"><span class="math inline">0.337</span></td>
-<td style="text-align: left;"><span class="math inline">0.760</span></td>
-<td style="text-align: left;"><span class="math inline">-34.0</span></td>
+<td class="gt_row gt_left" headers="Linear models (Worse Models)  Family">Poisson</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_AOV">0.012</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  Post_chi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_AOV">0.015</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  ISCV_chi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_AOV">0.013</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  PPC_ychi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_SW">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_AOV">0.340</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  HPC_ychi">&lt;0.01</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Delta">-803.3</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_SE">101.1</td>
+<td class="gt_row gt_right" headers="Linear models (Worse Models)  LOO_Pr">&lt;0.001</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="16" id="Nonlinear models (Better Models)" class="gt_group_heading" data-quarto-table-cell-role="th" style="font-weight: bold" scope="colgroup">Nonlinear models (Better Models)</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Nonlinear models (Better Models)  Family">HNB</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  Post_SW">1.000</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  Post_AOV">1.000</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  Post_chi">0.732</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  ISCV_SW">0.534</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  ISCV_AOV">1.000</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  ISCV_chi">0.262</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  PPC_SW">0.616</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  PPC_AOV">0.575</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  PPC_ychi">0.024</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  HPC_SW">0.593</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  HPC_AOV">0.518</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  HPC_ychi">0.348</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  LOO_Delta">0.0</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  LOO_SE">0.0</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  LOO_Pr">Ref.</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">NB</td>
-<td style="text-align: left;">Linear</td>
-<td style="text-align: left;"><span class="math inline">0.299</span></td>
-<td style="text-align: left;"><span class="math inline">0.010</span></td>
-<td style="text-align: left;"><span class="math inline">-42.5</span></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">HP</td>
-<td style="text-align: left;">Linear</td>
-<td style="text-align: left;"><span class="math inline">&lt;0.01</span></td>
-<td style="text-align: left;"><span class="math inline">0.020</span></td>
-<td style="text-align: left;"><span class="math inline">-118.6</span></td>
+<td class="gt_row gt_left" headers="Nonlinear models (Better Models)  Family">NB</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  Post_SW">0.337</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  Post_AOV">0.760</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  Post_chi">0.905</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  ISCV_SW">0.031</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  ISCV_AOV">0.650</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  ISCV_chi">0.372</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  PPC_SW">0.149</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  PPC_AOV">0.372</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  PPC_ychi">0.169</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  HPC_SW">0.478</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  HPC_AOV">0.538</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  HPC_ychi">0.755</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  LOO_Delta">-34.0</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  LOO_SE">9.9</td>
+<td class="gt_row gt_right" headers="Nonlinear models (Better Models)  LOO_Pr">&lt;0.001</td>
 </tr>
 </tbody>
 </table>
+
+</div>
+</div>
+</div>
+<div style="font-size: 0.8em">
 <ul>
-<li>The <strong>Nonlinear HNB</strong> model satisfies all diagnostic checks and significantly outperforms all other models out-of-sample.</li>
-<li>The nonlinear effect primarily acts on the <em>hurdle</em> component (zero-inflation probability increases away from 7.95m depth).</li>
+<li><strong>Linear Model:</strong> Marginal checks with SW tests lack power to detect the nonlinearity (<span class="math inline">p \ge 0.609</span>) in HNB and NB models, whereas Z-AOV-based tests successfully reject the misspecified model.</li>
+<li><strong>Nonlinear Model:</strong> Adding piecewise quadratic terms improve the linear models. Both nonlinear HNB and NB models strongly pass all Z-residual tests (e.g., HNB Z-AOV <span class="math inline">p = 1.000</span>).</li>
+<li><strong><span class="math inline">\text{PPC}_{y-\chi^2}</span> Discrepancy:</strong> This specific test diverges from other tests, rejecting both HNB models (<span class="math inline">p &lt; 0.05</span>) while accepting the NB variants.</li>
+<li><strong>LOO Model Comparison</strong>: Out-of-sample prediction definitively ranks the nonlinear HNB first (<span class="math inline">\Delta_{\text{elpd}}=0</span>), outperforming all linear, NB, and Poisson candidates. This confirms that our Z-residual diagnostics successfully guided us to the superior model.</li>
 </ul>
+</div>
 </section></section>
 <section>
-<section id="conclusion-future-directions" class="title-slide slide level1 center">
-<h1>Conclusion &amp; Future Directions</h1>
+<section id="conclusion-future-directions" class="title-slide slide level1 center" data-number="6">
+<h1><span class="header-section-number">6</span> Conclusion &amp; Future Directions</h1>
 
 </section>
-<section id="summary-of-contributions" class="slide level2">
-<h2>Summary of Contributions</h2>
+<section id="conclusions" class="slide level2">
+<h2>Conclusions</h2>
+<div style="font-size: 1em">
 <ul>
-<li><strong>Methodological Shift:</strong> Transitioned from “test-first, then summarize” (PPC) to “summarize-first, then test” (Z-residuals).</li>
-<li><strong>Asymptotic Calibration:</strong> Posterior and ISCV Z-residuals converge to standard normal, ensuring well-calibrated <span class="math inline">p</span>-values.</li>
-<li><strong>Diagnostic Versatility:</strong> Enables targeted tests (AOV, SW) that uncover structural flaws (like functional form misspecification) which omnibus checks miss.</li>
-<li><strong>Preserved Power:</strong> Uses full sample size without holdout reductions.</li>
+<li><strong>“Summarize-First, Then-Test”:</strong> Integrating RSPs over MCMC sample yields a <em>single</em> set of asymptotically <span class="math inline">N(0,1)</span> Z-residuals for standard graphical and statistical checks.</li>
+<li><strong>Higher Power &amp; Calibration:</strong> Z-residual diagnostics outperforms traditional PPC and HPC in detecting misspecification while maintaining nominal Type-I error rates.</li>
+<li><strong>Diagnosis beyond Marginal Checks:</strong> Marginal tests (SW, <span class="math inline">\chi^2</span>) may mask structural flaws; covariate-specific tests (<span class="math inline">Z</span>-AOV) and visual summaries are essential.</li>
+<li><strong>Reduced Conservatism:</strong> Parameter-wise Z-residual PPCs effectively mitigate the “double-use-of-data” bias of traditional <span class="math inline">\chi^2</span>-PPCs.</li>
+<li><strong>Real-World Efficacy:</strong> Successfully exposed an unmodeled nonlinear effect in the dolphin dataset, guiding a revision that improved out-of-sample prediction (LOO <code>elpd</code>).</li>
+<li><strong><a href="https://tiw150.github.io/Zresidual/index.html">Zresidual: An R Package</a>:</strong> A unified, highly extensible framework for standard and cross-validated Z-residuals, supporting popular packages (<code>brms</code>, <code>glm</code>, <code>coxph</code>, <code>survreg</code>, <code>glmmTMB</code>) and custom user-supplied distributions.</li>
 </ul>
+</div>
 </section>
 <section id="limitations-future-directions" class="slide level2">
 <h2>Limitations &amp; Future Directions</h2>
 <ul>
-<li><strong>Limitations:</strong>
-<ul>
-<li>Strict observation-level focus: Insensitive to internal/latent structure misspecifications (hierarchical effects, priors).</li>
-</ul></li>
-<li><strong>Future Work:</strong>
-<ul>
-<li>Extend framework to internal model components (synergizing with Uniform Parametrization Checks).</li>
-<li>Expand the suite of targeted Z-residual tests (e.g., spatial dependence, formal e-values for multiple testing correction).</li>
-<li>Improve computational efficiency for summarizing simulated <span class="math inline">p</span>-values over auxiliary <span class="math inline">\mathbf{U}</span>.</li>
-</ul></li>
+<li><strong>Diagnosing Latent Structures:</strong> The current framework focuses strictly on observation-level data, limiting its sensitivity to internal components like latent variables and priors. We plan to extend the “summarize-first” RSP framework to evaluate internal structures by integrating concepts from Uniform Parametrization Checks (UPC).</li>
+<li><strong>Exact Calibration for Discrete Data:</strong> To resolve the variation caused by auxiliary randomness (<span class="math inline">\boldsymbol{U}</span>), we will explore simulation-based calibration using the posterior predictive distribution. This approach aims to yield an exactly calibrated single-number <span class="math inline">p</span>-value without requiring computationally expensive MCMC reruns.</li>
+<li><strong>Expanding the Diagnostic Toolkit:</strong> Because no single test catches everything, we will develop a broader suite of targeted, highly sensitive and specific Z-residual tests to better pinpoint and separate different sources of model deficiency.</li>
+<li><strong>E-value Adaptations:</strong> We aim to adapt Z-residual diagnostics into e-statistics. Because E-values retain rigorous error-control guarantees when multiplied together, they offer a highly promising methodology for sequential and multiple Bayesian model criticism.</li>
 </ul>
-</section>
-<section id="questions" class="slide level2">
-<h2>Questions?</h2>
-<p><strong>Thank you.</strong></p>
-<p><em>Paper: “Z-residuals: A Versatile Diagnostic Framework for Bayesian Models”</em></p>
 
 </section></section>
     </div>
@@ -780,7 +1949,7 @@
 'autoAnimateDuration': 1,
 'autoAnimateUnmatched': true,
 'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"},{"title":"Display","icon":"<i class=\"fa fa-desktop\"></i>","content":"<div style=\"display: block;\">\n  <h1 class=\"slide-menu-title\">Display Ratio</h1>\n  <ul class=\"slide-menu-items\">\n    <li class=\"slide-menu-item\"><a onclick=\"Reveal.configure({ width: 1600, height: 900 });\">Widescreen (16:9)</a></li>\n    <li class=\"slide-menu-item\"><a onclick=\"Reveal.configure({ width: 1200, height: 900 });\">Standard (4:3)</a></li>\n    <li class=\"slide-menu-item\"><a onclick=\"Reveal.configure({ width: 1440, height: 900 });\">Tall (16:10)</a></li>\n  </ul>\n  \n  <h1 class=\"slide-menu-title\" style=\"margin-top: 25px;\">Continuous Font Size (px)</h1>\n  <div style=\"padding: 10px 20px; font-family: sans-serif;\">\n    <input type=\"range\" class=\"reveal-font-slider\" min=\"16\" max=\"72\" step=\"2\" value=\"32\" \n           oninput=\"document.querySelector('.reveal').style.fontSize = this.value + 'px'; Reveal.layout();\" \n           style=\"width: 100%; cursor: pointer;\">\n    \n    <div style=\"display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-top: 10px; color: #ccc;\">\n      <span>Smaller</span>\n      <span onclick=\"document.querySelector('.reveal').style.fontSize = ''; document.querySelector('.reveal-font-slider').value = 32; Reveal.layout();\" \n            style=\"cursor: pointer; color: #fff; font-weight: bold; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;\">\n        Reset\n      </span>\n      <span>Larger</span>\n    </div>\n  </div>\n\n  <h1 class=\"slide-menu-title\" style=\"margin-top: 25px;\">Debug Tools</h1>\n  <div style=\"padding: 10px 20px; font-family: sans-serif;\">\n    <label style=\"display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: #ccc; cursor: pointer;\">\n      <span>Show Section Frames</span>\n      <input type=\"checkbox\" checked onchange=\"document.body.classList.toggle('hide-debug');\" style=\"width: 18px; height: 18px; cursor: pointer;\">\n    </label>\n  </div>\n</div>\n"}],"openButton":true,"width":"wide","numbers":true},
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"},{"title":"Display","icon":"<i class=\"fa fa-desktop\"></i>","content":"<div style=\"display: block;\">\n  <h1 class=\"slide-menu-title\">Display Ratio</h1>\n  <ul class=\"slide-menu-items\">\n    <li class=\"slide-menu-item\"><a onclick=\"Reveal.configure({ width: 1600, height: 900 });\">Widescreen (16:9)</a></li>\n    <li class=\"slide-menu-item\"><a onclick=\"Reveal.configure({ width: 1200, height: 900 });\">Standard (4:3)</a></li>\n    <li class=\"slide-menu-item\"><a onclick=\"Reveal.configure({ width: 1440, height: 900 });\">Tall (16:10)</a></li>\n  </ul>\n  <h1 class=\"slide-menu-title\" style=\"margin-top: 25px;\">Continuous Font Size (px)</h1>\n  <div style=\"padding: 10px 20px; font-family: sans-serif;\">\n    <input type=\"range\" class=\"reveal-font-slider\" min=\"16\" max=\"72\" step=\"2\" value=\"32\" \n           oninput=\"document.querySelector('.reveal').style.fontSize = this.value + 'px'; Reveal.layout();\" \n           style=\"width: 100%; cursor: pointer;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-top: 10px; color: #ccc;\">\n      <span>Smaller</span>\n      <span onclick=\"document.querySelector('.reveal').style.fontSize = ''; document.querySelector('.reveal-font-slider').value = 32; Reveal.layout();\" \n            style=\"cursor: pointer; color: #fff; font-weight: bold; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;\">\n        Reset\n      </span>\n      <span>Larger</span>\n    </div>\n  </div>\n  <h1 class=\"slide-menu-title\" style=\"margin-top: 25px;\">Debug Tools</h1>\n  <div style=\"padding: 10px 20px; font-family: sans-serif;\">\n    <label style=\"display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: #ccc; cursor: pointer;\">\n      <span>Show Section Frames</span>\n      <input type=\"checkbox\" checked onchange=\"document.body.classList.toggle('hide-debug');\" style=\"width: 18px; height: 18px; cursor: pointer;\">\n    </label>\n  </div>\n</div>\n"}],"openButton":true,"width":"wide","numbers":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
  
@@ -907,7 +2076,7 @@
         previewLinks: false,
 
         // Transition style (none/fade/slide/convex/concave/zoom)
-        transition: 'convex',
+        transition: 'slide',
 
         // Transition speed (default/fast/slow)
         transitionSpeed: 'default',
@@ -1151,10 +2320,7 @@
       </script>
     <script>
       Reveal.on('ready', function() {
-        // A tiny delay ensures the scroll-view DOM has completely finished rendering
-        setTimeout(function() {
-          Reveal.layout();
-        }, 150); 
+        setTimeout(function() { Reveal.layout(); }, 150); 
       });
     </script>
     
