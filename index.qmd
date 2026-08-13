@@ -1,6 +1,8 @@
 ---
-title: Bayesian Z-residual Slides
+title: Presentations for "Z-residuals for Diagnosing Bayesian Models"
+author: Longhai Li
+date: last-modified
 format: html
 ---
-
-## [U of T, Sept 1, 2026](./slides_bayesian_zresid.html)
+---
+[Uiversity of Toronto, Sept 1 2026](./slides_bayesian_zresid.html){.btn .btn-primary}

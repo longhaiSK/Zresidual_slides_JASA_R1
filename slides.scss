@@ -3,6 +3,8 @@ $heading-color: #b16309;
 $link-color: #3c53ea;
 $font-size-root: 40px;
 
+/*-- scss:rules --*/
+
 /* Brute-force blue headers */
 .reveal h2, 
 .reveal h3, 
@@ -22,9 +24,11 @@ $font-size-root: 40px;
   text-align: center;
 }
 
-/* Temporary debug frame to check for overflowing content */
-.reveal .slides section {
-  outline: 0px dashed rgb(220, 13, 13) !important;
+
+/* Aesthetic slide frame attached to normal slide content only */
+.reveal .slides section:not(.title-slide):not(.level1):not(:has(section)) {
+  outline: 4px solid $heading-color !important; 
+  outline-offset: 30px !important; 
 }
 
 /* Class applied via the menu toggle to turn OFF the frames */
@@ -44,4 +48,6 @@ body.hide-debug .reveal .slides section {
   width: 100%;
   height: auto;
 }
+
+
 
