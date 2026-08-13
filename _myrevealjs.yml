@@ -19,31 +19,33 @@ format:
         <style>
           /* Move the Menu to the top-left */
           .reveal .slide-menu-button {
-            top: 30px !important; 
-            bottom: auto !important; 
-            left: 30px !important;
+            bottom: 3px !important; 
+            left: 5px !important;
             margin: 0 !important;
           }
+         /* Move Chalkboard icons leftward into the freed space */
+          .reveal #toggle-chalkboard {
+            left: 10px !important; /* Matches the left margin of your menu */
+          }
+          .reveal #toggle-notes {
+            left: 75px !important; /* Keeps it perfectly side-by-side with the easel */
+          }
           
-          /* Automatically shrink the refresh button on mobile screens (iPhones) */
+          /* Shrink the refresh button to 1/3 size (8.33px) on small screens */
           @media (max-width: 500px) {
-            #custom-refresh-btn {
-              top: 65px !important; /* Tucks it slightly closer to the menu on small screens */
-              left: 31px !important; /* Keeps it perfectly centered under the smaller menu */
-            }
             #custom-refresh-btn svg {
-              width: 16px !important; /* Shrinks the icon to match the mobile menu size */
-              height: 16px !important;
+              width: 8.33px !important; 
+              height: 8.33px !important;
             }
           }
         </style>
 
-        <!-- 1. The hardcoded HTML Refresh Button -->
+        <!-- 1. The hardcoded HTML Refresh Button (Top-Right) -->
         <div id="custom-refresh-btn" title="Refresh Page" onclick="window.location.reload();" 
-             style="position: fixed; top: 75px; left: 35px; z-index: 2147483647; cursor: pointer; color: rgba(0, 0, 0, 0.4); transition: all 0.2s ease;"
+             style="position: fixed; top: 10px; right: 10px; z-index: 2147483647; cursor: pointer; color: rgba(0, 0, 0, 0.4); transition: all 0.2s ease;"
              onmouseover="this.style.transform='scale(1.1)'; this.style.color='rgba(0, 0, 0, 0.8)';" 
              onmouseout="this.style.transform='scale(1)'; this.style.color='rgba(0, 0, 0, 0.4)';">
-          <!-- Default desktop size is set to 18px here -->
+          <!-- Default desktop size is set to 25px here -->
           <svg viewBox="0 0 24 24" width="25" height="25" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
