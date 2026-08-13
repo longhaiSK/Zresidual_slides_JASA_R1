@@ -2,10 +2,7 @@
 title: "Z-residuals: A Versatile Diagnostic Framework for Bayesian Models"
 format: 
   revealjs: 
-    embed-resources: true
-  beamer: 
-    include-before-body: 
-      - newcommands.tex
+    embed-resources: false
 metadata-files:
   - ./_myrevealjs.yml
 ---
