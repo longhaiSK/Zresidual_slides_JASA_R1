@@ -11,6 +11,7 @@ author:
     url: https://longhaisk.github.io/
     affiliations: University of Saskatchewan
 date: "September 1, 2026"
+html-math-method: mathjax
 format: 
   revealjs: 
     embed-resources: false
