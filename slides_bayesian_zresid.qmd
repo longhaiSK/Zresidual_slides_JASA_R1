@@ -1,14 +1,28 @@
 ---
 title: "Z-residuals: A Versatile Diagnostic Framework for Bayesian Models"
+author:
+  - name: Tingxuan Wu
+    affiliations: University of Saskatchewan
+  - name: Effie Gao
+    affiliations: University of Saskatchewan
+  - name: Cindy Feng
+    affiliations: Dalhousie University
+  - name: Longhai Li (**Presenter**)
+    url: https://longhaisk.github.io/
+    affiliations: University of Saskatchewan
+date: "September 1, 2026"
 format: 
   revealjs: 
     embed-resources: false
 metadata-files:
   - ./_myrevealjs.yml
 ---
- 
 
+# Acknowledgments {.unnumbered}
 
+* Special thanks to Prof. Wei Xu for hosting my visit to the University of Toronto.
+
+* Grateful acknowledgement is given to the Natural Sciences and Engineering Research Council of Canada (NSERC) for funding this work.
 
 # Introduction
 
