@@ -87,7 +87,7 @@ $$
    The selection of the test statistic, $D(\by, \btheta)$, is inherently arbitrary, lacking guidelines from data fitting results.
 
 2. **Masking of Structural Flaws:**
-   Relying on simple, marginal statistics (e.g., mean, median, or standardized deviations as used in $\chi^2$ statistic) can yield a "passing" score while hiding critical deficiencies like misspecified covariate functional forms.
+   Relying on simple, marginal statistics (e.g., mean, median, $\chi^2$ statistic) can yield a "passing" score while hiding critical deficiencies like misspecified covariate functional forms.
 
 3. **The "Test-First, Then-Summarize" Paradigm:**
    Computing dataset-level discrepancies for every MCMC draw evaluates the model against its exact training data, severely exacerbating double-use bias.

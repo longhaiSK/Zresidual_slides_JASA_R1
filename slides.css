@@ -33,18 +33,7 @@
 .reveal .slide.level1 h1 {
   text-align: center;
 }
-.reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section)) {
-  outline: 4px solid var(--frame-outline-color) !important; 
-  outline-offset: 30px !important; 
-  
-  /* This adds the rounded corners */
-  border-radius: 15px !important; 
-}
-/* Class applied via the menu toggle to turn OFF the frames */
-/* Class applied via the menu toggle to turn OFF the frames */
-body.hide-debug .reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section)) {
-  outline: none !important;
-}
+
 /* Center standalone slide images and fill the available width by default.
    Scoped to images that are direct children of a slide (not inside a
    .columns/.column layout), so deliberately custom-sized images inside
@@ -56,4 +45,57 @@ body.hide-debug .reveal .slides section:not(#title-slide):not(.title-slide):not(
   margin-right: auto;
   width: 100%;
   height: auto;
+}
+
+/* 1. The Main Slide Frame (Painted OUTSIDE using ::before, without breaking Reveal's position) */
+.reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section))::before {
+  content: "";
+  position: absolute;
+  /* Pushes the visual border 30px outward in every direction into the screen gap */
+  top: -30px; 
+  left: -30px; 
+  right: -30px; 
+  bottom: -30px;
+  
+  border: 4px solid var(--frame-outline-color) !important; 
+  border-radius: 15px !important; 
+  background-color: rgba(8, 61, 219, 0.05) !important; 
+  
+  z-index: -1; /* Ensures this background stays strictly behind your text/images */
+  pointer-events: none; /* Prevents the background from blocking mouse clicks */
+}
+
+/* 2. The Beamer Title Box (Stretches to cover the expanded top area) */
+.reveal .slides section:not(#title-slide):not(.title-slide):not(.level1) > h2 {
+  background-color: var(--frame-outline-color) !important; 
+  color: #ffffff !important; 
+  
+  /* Reaches out exactly 30px to snap flush against the expanded border walls */
+  margin: -30px -30px 30px -30px !important; 
+  width: calc(100% + 60px) !important; 
+  padding: 15px 30px !important; 
+  
+  border-radius: 10px 10px 0 0 !important; 
+  text-align: left !important;
+  box-sizing: border-box !important;
+  
+  position: relative; 
+  z-index: 1; /* Keeps the title box stacked above the light blue background */
+}
+
+/* Ensure section-break slides keep their normal centering */
+.reveal .slide.level2 h2 {
+  text-align: center !important;
+}
+
+/* 3. The Toggle to turn frames completely OFF via your menu */
+body.hide-debug .reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section))::before {
+  display: none !important; /* Instantly turns off the pseudo-element frame */
+}
+body.hide-debug .reveal .slides section:not(#title-slide):not(.title-slide):not(.level1) > h2 {
+  background-color: transparent !important; 
+  color: var(--frame-outline-color) !important; 
+  margin: 0 0 30px 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
 }

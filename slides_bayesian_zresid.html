@@ -272,7 +272,7 @@ Cindy Feng
 <h2>Limitations of PPC and HPC</h2>
 <ol type="1">
 <li><p><strong>Arbitrary Discrepancy Measures:</strong> The selection of the test statistic, <span class="math inline">D(\boldsymbol{y}, \boldsymbol{\theta})</span>, is inherently arbitrary, lacking guidelines from data fitting results.</p></li>
-<li><p><strong>Masking of Structural Flaws:</strong> Relying on simple, marginal statistics (e.g., mean, median, or standardized deviations as used in <span class="math inline">\chi^2</span> statistic) can yield a “passing” score while hiding critical deficiencies like misspecified covariate functional forms.</p></li>
+<li><p><strong>Masking of Structural Flaws:</strong> Relying on simple, marginal statistics (e.g., mean, median, <span class="math inline">\chi^2</span> statistic) can yield a “passing” score while hiding critical deficiencies like misspecified covariate functional forms.</p></li>
 <li><p><strong>The “Test-First, Then-Summarize” Paradigm:</strong> Computing dataset-level discrepancies for every MCMC draw evaluates the model against its exact training data, severely exacerbating double-use bias.</p></li>
 <li><p><strong>Poor Calibration &amp; Low Power:</strong> Due to double-use bias, PPC <span class="math inline">p</span>-values (especially <span class="math inline">\chi^2</span>) are rarely uniform under the null. They artificially cluster around <span class="math inline">0.5</span>, crippling the test’s power to detect true model misfit.</p></li>
 <li><p><strong>The Holdout Predictive Check (HPC) Compromise:</strong> Recently proposed to replace PPCs, HPC splits the data into training and test sets to eliminate double-use bias. However, this data-splitting drastically reduces the effective sample size, leading to a severe loss of statistical power and instability in the evaluation.</p></li>
@@ -341,23 +341,23 @@ Cindy Feng
 <h2>A Paradigm Shift</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div id="mykqyldikr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mykqyldikr table {
+<div id="chqaaiajrz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#chqaaiajrz table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#mykqyldikr thead, #mykqyldikr tbody, #mykqyldikr tfoot, #mykqyldikr tr, #mykqyldikr td, #mykqyldikr th {
+#chqaaiajrz thead, #chqaaiajrz tbody, #chqaaiajrz tfoot, #chqaaiajrz tr, #chqaaiajrz td, #chqaaiajrz th {
   border-style: none;
 }
 
-#mykqyldikr p {
+#chqaaiajrz p {
   margin: 0;
   padding: 0;
 }
 
-#mykqyldikr .gt_table {
+#chqaaiajrz .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -383,12 +383,12 @@ Cindy Feng
   border-left-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_caption {
+#chqaaiajrz .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#mykqyldikr .gt_title {
+#chqaaiajrz .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -400,7 +400,7 @@ Cindy Feng
   border-bottom-width: 0;
 }
 
-#mykqyldikr .gt_subtitle {
+#chqaaiajrz .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -412,7 +412,7 @@ Cindy Feng
   border-top-width: 0;
 }
 
-#mykqyldikr .gt_heading {
+#chqaaiajrz .gt_heading {
   background-color: rgba(255, 255, 255, 0);
   text-align: center;
   border-bottom-color: rgba(255, 255, 255, 0);
@@ -424,13 +424,13 @@ Cindy Feng
   border-right-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_bottom_border {
+#chqaaiajrz .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_col_headings {
+#chqaaiajrz .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -445,7 +445,7 @@ Cindy Feng
   border-right-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_col_heading {
+#chqaaiajrz .gt_col_heading {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   font-size: 100%;
@@ -465,7 +465,7 @@ Cindy Feng
   overflow-x: hidden;
 }
 
-#mykqyldikr .gt_column_spanner_outer {
+#chqaaiajrz .gt_column_spanner_outer {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   font-size: 100%;
@@ -477,15 +477,15 @@ Cindy Feng
   padding-right: 4px;
 }
 
-#mykqyldikr .gt_column_spanner_outer:first-child {
+#chqaaiajrz .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mykqyldikr .gt_column_spanner_outer:last-child {
+#chqaaiajrz .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mykqyldikr .gt_column_spanner {
+#chqaaiajrz .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -497,11 +497,11 @@ Cindy Feng
   width: 100%;
 }
 
-#mykqyldikr .gt_spanner_row {
+#chqaaiajrz .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#mykqyldikr .gt_group_heading {
+#chqaaiajrz .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -527,7 +527,7 @@ Cindy Feng
   text-align: left;
 }
 
-#mykqyldikr .gt_empty_group_heading {
+#chqaaiajrz .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
@@ -542,15 +542,15 @@ Cindy Feng
   vertical-align: middle;
 }
 
-#mykqyldikr .gt_from_md > :first-child {
+#chqaaiajrz .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#mykqyldikr .gt_from_md > :last-child {
+#chqaaiajrz .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#mykqyldikr .gt_row {
+#chqaaiajrz .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -569,7 +569,7 @@ Cindy Feng
   overflow-x: hidden;
 }
 
-#mykqyldikr .gt_stub {
+#chqaaiajrz .gt_stub {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   font-size: 100%;
@@ -582,7 +582,7 @@ Cindy Feng
   padding-right: 5px;
 }
 
-#mykqyldikr .gt_stub_row_group {
+#chqaaiajrz .gt_stub_row_group {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   font-size: 100%;
@@ -596,15 +596,15 @@ Cindy Feng
   vertical-align: top;
 }
 
-#mykqyldikr .gt_row_group_first td {
+#chqaaiajrz .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#mykqyldikr .gt_row_group_first th {
+#chqaaiajrz .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#mykqyldikr .gt_summary_row {
+#chqaaiajrz .gt_summary_row {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   text-transform: inherit;
@@ -614,16 +614,16 @@ Cindy Feng
   padding-right: 5px;
 }
 
-#mykqyldikr .gt_first_summary_row {
+#chqaaiajrz .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_first_summary_row.thick {
+#chqaaiajrz .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#mykqyldikr .gt_last_summary_row {
+#chqaaiajrz .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -633,7 +633,7 @@ Cindy Feng
   border-bottom-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_grand_summary_row {
+#chqaaiajrz .gt_grand_summary_row {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   text-transform: inherit;
@@ -643,7 +643,7 @@ Cindy Feng
   padding-right: 5px;
 }
 
-#mykqyldikr .gt_first_grand_summary_row {
+#chqaaiajrz .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -653,7 +653,7 @@ Cindy Feng
   border-top-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_last_grand_summary_row_top {
+#chqaaiajrz .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -663,11 +663,11 @@ Cindy Feng
   border-bottom-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_striped {
+#chqaaiajrz .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mykqyldikr .gt_table_body {
+#chqaaiajrz .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -676,7 +676,7 @@ Cindy Feng
   border-bottom-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_footnotes {
+#chqaaiajrz .gt_footnotes {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   border-bottom-style: none;
@@ -690,7 +690,7 @@ Cindy Feng
   border-right-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_footnote {
+#chqaaiajrz .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -699,7 +699,7 @@ Cindy Feng
   padding-right: 5px;
 }
 
-#mykqyldikr .gt_sourcenotes {
+#chqaaiajrz .gt_sourcenotes {
   color: #333333;
   background-color: rgba(255, 255, 255, 0);
   border-bottom-style: none;
@@ -713,7 +713,7 @@ Cindy Feng
   border-right-color: #D3D3D3;
 }
 
-#mykqyldikr .gt_sourcenote {
+#chqaaiajrz .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -721,72 +721,72 @@ Cindy Feng
   padding-right: 5px;
 }
 
-#mykqyldikr .gt_left {
+#chqaaiajrz .gt_left {
   text-align: left;
 }
 
-#mykqyldikr .gt_center {
+#chqaaiajrz .gt_center {
   text-align: center;
 }
 
-#mykqyldikr .gt_right {
+#chqaaiajrz .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mykqyldikr .gt_font_normal {
+#chqaaiajrz .gt_font_normal {
   font-weight: normal;
 }
 
-#mykqyldikr .gt_font_bold {
+#chqaaiajrz .gt_font_bold {
   font-weight: bold;
 }
 
-#mykqyldikr .gt_font_italic {
+#chqaaiajrz .gt_font_italic {
   font-style: italic;
 }
 
-#mykqyldikr .gt_super {
+#chqaaiajrz .gt_super {
   font-size: 65%;
 }
 
-#mykqyldikr .gt_footnote_marks {
+#chqaaiajrz .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#mykqyldikr .gt_asterisk {
+#chqaaiajrz .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#mykqyldikr .gt_indent_1 {
+#chqaaiajrz .gt_indent_1 {
   text-indent: 5px;
 }
 
-#mykqyldikr .gt_indent_2 {
+#chqaaiajrz .gt_indent_2 {
   text-indent: 10px;
 }
 
-#mykqyldikr .gt_indent_3 {
+#chqaaiajrz .gt_indent_3 {
   text-indent: 15px;
 }
 
-#mykqyldikr .gt_indent_4 {
+#chqaaiajrz .gt_indent_4 {
   text-indent: 20px;
 }
 
-#mykqyldikr .gt_indent_5 {
+#chqaaiajrz .gt_indent_5 {
   text-indent: 25px;
 }
 
-#mykqyldikr .katex-display {
+#chqaaiajrz .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#mykqyldikr div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#chqaaiajrz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
