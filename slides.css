@@ -47,6 +47,9 @@
   height: auto;
 }
 
+/* 4. Menu and Button Placement */
+
+
 /* 1. The Main Slide Frame (Painted OUTSIDE using ::before, without breaking Reveal's position) */
 .reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section))::before {
   content: "";
