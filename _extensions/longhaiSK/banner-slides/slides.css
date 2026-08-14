@@ -49,6 +49,44 @@
 
 /* 4. Menu and Button Placement */
 
+/* Move the Menu to the top-left */
+.reveal .slide-menu-button {
+  top: 30px !important;
+  bottom: auto !important;
+  left: 10px !important;
+  margin: 0 !important;
+}
+
+/* Reusable class for all custom slide buttons (chalkboard, notes, refresh) */
+.custom-slide-button {
+  position: fixed;
+  z-index: 2147483647; /* High z-index to stay on top */
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.custom-slide-button:hover {
+  transform: scale(1.1);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+#custom-refresh-btn {
+  position: fixed;
+  top: 30px;
+  right: 10px;
+  z-index: 2147483647;
+}
+
+/* Mobile sizing for custom buttons, matching the menu breakpoint */
+@media (max-width: 800px) {
+  #custom-chalkboard-btn svg,
+  #custom-notes-btn svg,
+  #custom-refresh-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
 
 /* 1. The Main Slide Frame (Painted OUTSIDE using ::before, without breaking Reveal's position) */
 .reveal .slides section:not(#title-slide):not(.title-slide):not(.level1):not(:has(section))::before {
