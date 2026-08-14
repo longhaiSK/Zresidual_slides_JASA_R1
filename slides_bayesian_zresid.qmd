@@ -11,7 +11,7 @@ author:
     url: https://longhaisk.github.io/
     affiliations: University of Saskatchewan
 date: "September 1, 2026"
-format: banner-slides-revealjs
+format: banner_slides-revealjs
 ---
 
 # Acknowledgments {.unnumbered}
